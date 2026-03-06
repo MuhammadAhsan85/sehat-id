@@ -1,0 +1,411 @@
+{
+    "navbar": {
+        "links": {
+            "home": "SehatID Home",
+            "findDonors": "Find Donors",
+            "becomeDonor": "Become a Donor",
+            "howItWorks": "How it Works",
+            "aboutUs": "About Us"
+        },
+        "auth": {
+            "hi": "Hi,",
+            "dashboard": "Dashboard",
+            "login": "Login",
+            "register": "Register"
+        },
+        "aria": {
+            "mainNav": "Main navigation",
+            "closeMenu": "Close navigation menu",
+            "openMenu": "Open navigation menu",
+            "navMenu": "Navigation menu"
+        }
+    },
+    "footer": {
+        "tagline": "Empowering Pakistan through secure blood donation connectivity. Our platform bridges the gap between donors and those in urgent need, saving lives through technology.",
+        "sections": {
+            "platform": "Platform",
+            "legal": "Legal",
+            "contact": "Contact"
+        },
+        "links": {
+            "findBlood": "Find Blood Donors",
+            "becomeDonor": "Become a Donor",
+            "bloodBanks": "Blood Bank Directory",
+            "emergency": "Emergency Requests",
+            "stories": "Success Stories",
+            "privacy": "Privacy Policy",
+            "terms": "Terms of Service",
+            "cookies": "Cookie Policy",
+            "dataCompliance": "Data Compliance",
+            "healthcare": "Healthcare Standards"
+        },
+        "contact": {
+            "address": "Karachi Innovation Center, Sindh, Pakistan"
+        },
+        "bottom": {
+            "rights": "© 2024 Sehat ID. All rights reserved. Registered Life-Saving Organization in Pakistan.",
+            "admin": "Admin Login",
+            "secure": "Verified Secure"
+        }
+    },
+    "home": {
+        "badge": "Pakistan's Most Trusted Emergency Blood Network",
+        "heroTitle1": "Every Drop Counts.",
+        "heroTitle2": "Every Second Matters.",
+        "heroDesc": "Connect instantly with verified blood donors across Pakistan. Our secure, real-time platform ensures that life-saving help is always just a click away.",
+        "searchWidget": {
+            "bloodGroup": "Select Blood Group",
+            "locationPlaceholder": "Enter your city (e.g. Karachi, Lahore, Islamabad)",
+            "button": "Search Donors"
+        },
+        "socialProof": "Join {count} verified heroes saving lives today",
+        "registerDonor": "Register as a Donor",
+        "howItWorks": "How It Works",
+        "statsActivedonors": "Active Donors",
+        "statsMatched": "Requests Matched",
+        "statsCities": "Major Cities",
+        "features": {
+            "badge": "Platform Integrity",
+            "title1": "The Most Secure Way to",
+            "title2": "Find Verified Donors",
+            "subtitle": "SehatID is Pakistan's first fully encrypted blood donation network, prioritizing donor privacy and recipient safety above all else.",
+            "items": {
+                "verified": {
+                    "title": "Verified Identities",
+                    "desc": "Every donor is verified through CNIC and phone authentication to ensure a 100% trustworthy network."
+                },
+                "privacy": {
+                    "title": "Privacy Focused",
+                    "desc": "Your personal data is encrypted. Contact details are only shared after a mutual match is confirmed."
+                },
+                "speed": {
+                    "title": "Real-time Matching",
+                    "desc": "Our automated system finds the nearest compatible donor in seconds, saving critical time in emergencies."
+                }
+            }
+        },
+        "trust": {
+            "verifiedDonors": "Verified Blood Donors Pakistan",
+            "citiesCovered": "Cities Covered Nationwide",
+            "emergencyMatches": "Emergency Matches Daily",
+            "verificationRate": "Success Verification Rate"
+        },
+        "process": {
+            "badge": "Our Methodology",
+            "title1": "How",
+            "title2": "SehatID",
+            "title3": "Saves Lives",
+            "subtitle": "Join Pakistan's most secure blood donation network. Our streamlined digital process ensures rapid matching during critical medical emergencies.",
+            "steps": {
+                "step1": {
+                    "title": "Register as Donor",
+                    "desc": "Join Pakistan's largest verified network in less than 2 minutes."
+                },
+                "step2": {
+                    "title": "Search Nearby",
+                    "desc": "Find compatible blood donors in your city with real-time tracking."
+                },
+                "step3": {
+                    "title": "Connect & Save",
+                    "desc": "Coordinate safely with verified donors and save a life today."
+                }
+            },
+            "viewFull": "View Full Process Breakdown"
+        },
+        "emergency": {
+            "badge": "Live Emergency Alerts",
+            "title1": "Verified Urgent Needs",
+            "title2": "Across Pakistan",
+            "subtitle": "Real-time blood requests from verified medical institutions. Your response can save a life in the next hour.",
+            "button": "View Active Requests"
+        },
+        "finalCta": {
+            "title": "Every Drop is a Gift of Life.",
+            "subtitle": "Whether you are a donor or a patient, we are here to support you. Join Pakistan's fastest growing blood network today.",
+            "register": "Register as a Donor",
+            "find": "Find Blood Now"
+        },
+        "stories": {
+            "badge": "Impact Stories",
+            "title": "Real People. Real Impact.",
+            "subtitle": "Connecting donors with patients is more than just data—it's about saving lives across Pakistan.",
+            "story1": {
+                "name": "Ahmed Raza",
+                "location": "Karachi",
+                "text": "Finding O-negative blood at 2 AM seemed impossible. SehatID connected us with a verified donor in under 15 minutes. Truly a life-saver."
+            }
+        }
+    },
+    "profile": {
+        "title": "Donor Profile",
+        "verifiedDonor": "Verified Donor",
+        "available": "Available",
+        "bloodGroup": "Blood Group",
+        "editProfile": "Edit Profile",
+        "logout": "Logout",
+        "city": "City",
+        "area": "Area",
+        "availability": "Availability",
+        "lastDonated": "Last Donated",
+        "totalDonations": "Total Donations",
+        "eligibility": "Eligibility",
+        "eligibleNow": "Eligible Now",
+        "availableNow": "Available Now",
+        "notAvailable": "Not Available",
+        "privacyTitle": "Privacy & Data Security",
+        "privacyDesc": "Your security is our priority. Sehat ID uses enterprise-grade encryption to protect your identity.",
+        "privacyFeature1": "Your CNIC is cryptographically hashed and never stored in plain text.",
+        "privacyFeature2": "Phone numbers are hidden from public view and only shared with verified medical requests.",
+        "privacyFeature3": "All data processing complies with healthcare privacy standards in Pakistan.",
+        "deleteAccount": "Delete My Account",
+        "deleteConfirm": "Are you sure you want to permanently delete your account? This action cannot be undone.",
+        "stats": {
+            "lastDonated": "Last Donated",
+            "totalDonations": "Total Donations",
+            "eligibility": "Eligibility",
+            "eligibleNow": "Eligible Now"
+        },
+        "quickActions": {
+            "title": "Quick Actions",
+            "updateInfo": "Update Donor Info",
+            "findDonors": "Find Donors"
+        }
+    },
+    "country": {
+        "selectCountry": "Select Country",
+        "pakistan": "Pakistan",
+        "usa": "United States",
+        "uk": "United Kingdom",
+        "saudiArabia": "Saudi Arabia",
+        "india": "India",
+        "canada": "Canada"
+    },
+    "findDonors": {
+        "title": "Find Blood Donors",
+        "badge": "Live Search",
+        "subtitle": "Connect with verified donors across Pakistan in real-time.",
+        "bloodGroup": "Blood Group",
+        "allBloodGroups": "All Blood Groups",
+        "province": "Province",
+        "allProvinces": "All Provinces",
+        "city": "City",
+        "cityPlaceholder": "e.g. Karachi",
+        "availableOnly": "Available donors only",
+        "resetFilters": "Reset Filters",
+        "searching": "Searching…",
+        "donorsFound": "{count} donor{plural} found",
+        "noResults": "No donors found",
+        "noResultsHint": "Try broadening your search filters.",
+        "available": "Available",
+        "donations": "{count} donation{plural}"
+    },
+    "login": {
+        "title": "Welcome back",
+        "subtitle": "Sign in to your SehatID account",
+        "email": "Email address",
+        "password": "Password",
+        "forgotPassword": "Forgot password?",
+        "signIn": "Sign In",
+        "signingIn": "Signing in…",
+        "noAccount": "Don't have an account?",
+        "registerNow": "Register now"
+    },
+    "register": {
+        "title": "Create your account",
+        "subtitle": "Join Pakistan's blood donation network",
+        "iAmA": "I am a",
+        "donor": "donor",
+        "patient": "patient",
+        "fullName": "Full Name",
+        "namePlaceholder": "e.g. Fatima Malik",
+        "email": "Email address",
+        "emailPlaceholder": "you@example.com",
+        "password": "Password",
+        "passwordPlaceholder": "Min 8 chars, 1 uppercase, 1 number",
+        "confirmPassword": "Confirm Password",
+        "confirmPlaceholder": "••••••••",
+        "createAccount": "Create Account",
+        "creatingAccount": "Creating account…",
+        "alreadyHaveAccount": "Already have an account?",
+        "signIn": "Sign in",
+        "strength": {
+            "weak": "Weak",
+            "fair": "Fair",
+            "good": "Good",
+            "strong": "Strong"
+        }
+    },
+    "errors": {
+        "loginFailed": "Login failed. Please try again.",
+        "registrationFailed": "Registration failed. Please try again.",
+        "invalidEmail": "Please enter a valid email address",
+        "passwordMin": "Password must be at least 8 characters",
+        "passwordUppercase": "Password must contain at least one uppercase letter",
+        "passwordNumber": "Password must contain at least one number",
+        "passwordsMismatch": "Passwords do not match",
+        "nameMin": "Name must be at least 2 characters",
+        "cityMin": "City is required",
+        "provinceMin": "Province is required",
+        "weightMin": "Minimum weight is 50 kg",
+        "dobRequired": "Date of birth is required",
+        "selectBloodGroup": "Please select a blood group",
+        "selectRole": "Please select your role"
+    },
+    "about": {
+        "badge": "Built for Pakistan",
+        "title": "About Sehat ID",
+        "subtitle": "Pakistan's Digital Blood Network. <span>Built for Privacy.</span> Dedicated to Life.",
+        "mission": "\"To ensure no life is lost in Pakistan due to lack of timely access to compatible blood donors.\"",
+        "missionLabel": "Our Core Mission",
+        "valuesTitle": "Our Core Values",
+        "valuesSubtitle": "The principles that guide our clinical and digital operations.",
+        "values": {
+            "privacy": {
+                "title": "Privacy First",
+                "desc": "We utilize advanced CNIC hashing and data encryption to ensure your identity remains protected until a match is confirmed."
+            },
+            "integrity": {
+                "title": "Clinical Integrity",
+                "desc": "Our algorithms strictly follow international medical matching standards to ensure donor and recipient compatibility."
+            },
+            "profit": {
+                "title": "Zero Profit",
+                "desc": "Sehat ID is a humanitarian project. The platform is, and will always be, 100% free for all citizens and medical centers."
+            },
+            "transparency": {
+                "title": "Transparency",
+                "desc": "Every request is logged and verifiable. We maintain high standards of accountability for every blood unit managed."
+            }
+        },
+        "lifecycleTitle": "Modernizing the Lifecycle of Life.",
+        "lifecycleDesc": "For decades, finding blood donors in Pakistan has relied on chaotic social media posts and word-of-mouth. We are changing that.",
+        "reality": {
+            "title": "The Current Reality",
+            "item1": "Scattered donor lists and outdated phone numbers.",
+            "item2": "Privacy risks when sharing CNICs on public groups.",
+            "item3": "No clinical validation of medical history before request."
+        },
+        "solution": {
+            "title": "The Sehat ID Solution",
+            "item1": "Verified, real-time digital donor database.",
+            "item2": "End-to-end encrypted privacy and anonymity.",
+            "item3": "Seamless hospital-to-donor direct connectivity."
+        },
+        "stats": {
+            "donors": "Verified Donors",
+            "cities": "Cities Covered",
+            "lives": "Lives Impacted",
+            "hospitals": "Partner Hospitals"
+        },
+        "cta": {
+            "title": "Join the Movement",
+            "desc": "Your contribution can be the difference between life and death. Register as a donor today and be part of Pakistan's safest digital blood network.",
+            "register": "Register as Donor",
+            "requests": "View Live Requests"
+        }
+    },
+    "dashboard": {
+        "badge": "Your Dashboard",
+        "welcome": "Welcome back 👋",
+        "subtitle": "Manage your donor profile, track donations, and help save lives.",
+        "updateProfile": "Update Donor Profile",
+        "stats": {
+            "totalDonations": "Total Donations",
+            "totalDonationsSub": "Lifetime donations",
+            "requestsHelped": "Requests Helped",
+            "requestsHelpedSub": "Patients assisted",
+            "daysUntilEligible": "Days Until Eligible",
+            "daysUntilEligibleSub": "Next donation window",
+            "donorRank": "Donor Rank",
+            "donorRankSub": "Keep donating to level up",
+            "rankNew": "New"
+        },
+        "activeRequests": {
+            "title": "Active Blood Requests",
+            "viewAll": "View all",
+            "table": {
+                "patient": "Patient",
+                "group": "Group",
+                "city": "City",
+                "urgency": "Urgency",
+                "posted": "Posted",
+                "action": "Respond"
+            },
+            "urgency": {
+                "critical": "Critical",
+                "moderate": "Moderate",
+                "low": "Low"
+            },
+            "time": {
+                "hoursAgo": "{count} hrs ago",
+                "dayAgo": "1 day ago"
+            }
+        },
+        "quickActions": {
+            "title": "Quick Actions",
+            "findDonors": {
+                "title": "Find Blood Donors",
+                "desc": "Search donors by blood group and city.",
+                "cta": "Search →"
+            },
+            "becomeDonor": {
+                "title": "Become a Donor",
+                "desc": "Update your donor registration.",
+                "cta": "Update →"
+            },
+            "myProfile": {
+                "title": "My Profile",
+                "desc": "Edit personal details and contact.",
+                "cta": "Edit →"
+            }
+        }
+    },
+    "sidebar": {
+        "dashboard": "Dashboard",
+        "requests": "Active Requests",
+        "history": "Donation History",
+        "settings": "Settings",
+        "logout": "Logout",
+        "premium": "Premium Member"
+    },
+    "tracking": {
+        "breadcrumb": "Request Status",
+        "emergency": "Emergency Blood Request",
+        "searching": "Searching Live",
+        "patient": "Patient Name",
+        "requiredUnits": "Required Units",
+        "units": "{count} Units",
+        "requestDate": "Request Date",
+        "urgency": "Urgency",
+        "immediate": "Immediate",
+        "liveTitle": "Live Tracking",
+        "realtime": "Real-time",
+        "timeline": {
+            "received": "Request Received",
+            "finding": "Finding Matches",
+            "committed": "Donor Committed",
+            "transfusion": "Blood Transfusion",
+            "pending": "Pending"
+        },
+        "map": {
+            "connecting": "Connecting to Live Map Service",
+            "donorAway": "Donor: {name} is {distance} away",
+            "etaLabel": "ETA to Hospital",
+            "etaValue": "{count} Minutes",
+            "fullMap": "Full Map"
+        },
+        "activity": {
+            "title": "Recent Activity",
+            "viewAll": "View All Logs",
+            "requestCreated": "Request created",
+            "matchesNotified": "{count} Matches notified",
+            "donorAccepted": "Donor {name} accepted",
+            "donorDistance": "Donor is {distance} away"
+        },
+        "matches": {
+            "title": "Potential Matches",
+            "nearby": "Nearby",
+            "call": "Call Securely"
+        }
+    }
+}

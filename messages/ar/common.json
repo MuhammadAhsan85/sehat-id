@@ -1,0 +1,133 @@
+{
+    "nav": {
+        "findDonors": "العثور على المتبرعين",
+        "becomeADonor": "كن متبرعًا",
+        "howItWorks": "كيف يعمل",
+        "aboutUs": "من نحن",
+        "login": "تسجيل الدخول",
+        "register": "التسجيل",
+        "dashboard": "لوحة التحكم",
+        "openMenu": "افتح قائمة التنقل",
+        "closeMenu": "أغلق قائمة التنقل",
+        "home": "الصفحة الرئيسية لسيهات آي دي"
+    },
+    "footer": {
+        "platform": "المنصة",
+        "legal": "القانونية",
+        "contact": "التواصل",
+        "platformLinks": {
+            "findBloodDonors": "العثور على متبرعي الدم",
+            "becomeADonor": "كن متبرعًا",
+            "bloodBankDirectory": "دليل بنك الدم",
+            "emergencyRequests": "طلبات الطوارئ",
+            "successStories": "قصص النجاح"
+        },
+        "legalLinks": {
+            "privacyPolicy": "سياسة الخصوصية",
+            "termsOfService": "شروط الخدمة",
+            "cookiePolicy": "سياسة ملفات تعريف الارتباط",
+            "dataCompliance": "الامتثال للبيانات",
+            "healthcareStandards": "معايير الرعاية الصحية"
+        },
+        "tagline": "تمكين باكستان من خلال التبرع الآمن بالدم. منصتنا تجسر الفجوة بين المتبرعين والمحتاجين.",
+        "copyright": "© {year} سيهات آي دي. جميع الحقوق محفوظة. منظمة إنقاذ الأرواح المسجلة في باكستان.",
+        "adminLogin": "دخول المسؤول",
+        "verifiedSecure": "موثق وآمن"
+    },
+    "home": {
+        "badge": "شبكة الطوارئ الصحية في باكستان",
+        "heroTitle": "ربط الدم.",
+        "heroSubtitle": "إنقاذ الأرواح.",
+        "heroDesc": "منصة موثوقة لمطابقة المتبرعين المعتمدين، مع ضمان السلامة والخصوصية في كل اتصال.",
+        "findBlood": "ابحث عن الدم الآن",
+        "becomeDonor": "كن متبرعًا",
+        "socialProof": "{count}+ قصة نجاح الشهر الماضي",
+        "statsActivedonors": "متبرعون نشطون",
+        "statsMatched": "طلبات تمت مطابقتها",
+        "statsCities": "مدن رئيسية"
+    },
+    "profile": {
+        "title": "ملفي الشخصي",
+        "verifiedDonor": "متبرع موثق",
+        "bloodGroup": "فصيلة الدم: {group}",
+        "editProfile": "تعديل الملف الشخصي",
+        "logout": "تسجيل الخروج",
+        "city": "المدينة",
+        "area": "المنطقة",
+        "availability": "التوفر",
+        "lastDonated": "آخر تبرع",
+        "availableNow": "متاح الآن",
+        "notAvailable": "غير متاح",
+        "privacyTitle": "الخصوصية وأمان البيانات",
+        "privacyDesc": "أمانك أولويتنا. يستخدم سيهات آي دي تشفيرًا على مستوى المؤسسات لحماية هويتك.",
+        "privacyFeature1": "رقم هويتك مُشفَّر تشفيرًا مزدوجًا ولا يُخزَّن كنص عادي أبدًا.",
+        "privacyFeature2": "أرقام الهواتف مخفية عن الرأي العام ولا تُشارَك إلا مع الطلبات الطبية الموثقة.",
+        "privacyFeature3": "تتوافق جميع معالجات البيانات مع معايير خصوصية الرعاية الصحية في باكستان.",
+        "deleteAccount": "حذف حسابي",
+        "deleteConfirm": "هل أنت متأكد أنك تريد حذف حسابك نهائيًا؟ لا يمكن التراجع عن هذا الإجراء."
+    },
+    "country": {
+        "selectCountry": "اختر الدولة",
+        "pakistan": "باكستان",
+        "usa": "الولايات المتحدة",
+        "uk": "المملكة المتحدة",
+        "saudiArabia": "المملكة العربية السعودية",
+        "india": "الهند",
+        "canada": "كندا"
+    },
+    "findDonors": {
+        "title": "العثور على متبرعي الدم",
+        "badge": "بحث مباشر",
+        "subtitle": "تواصل مع متبرعين معتمدين في جميع أنحاء باكستان في الوقت الفعلي.",
+        "bloodGroup": "فصيلة الدم",
+        "allBloodGroups": "جميع فصائل الدم",
+        "province": "المحافظة",
+        "allProvinces": "جميع المحافظات",
+        "city": "المدينة",
+        "cityPlaceholder": "مثال: كراتشي",
+        "availableOnly": "المتبرعون المتاحون فقط",
+        "resetFilters": "إعادة ضبط الفلاتر",
+        "searching": "جار البحث…",
+        "donorsFound": "تم العثور على {count} متبرع",
+        "noResults": "لم يتم العثور على متبرعين",
+        "noResultsHint": "حاول توسيع معايير البحث.",
+        "available": "متاح",
+        "donations": "{count} تبرع"
+    },
+    "login": {
+        "title": "مرحبًا بعودتك",
+        "subtitle": "تسجيل الدخول إلى حسابك في سيهات آي دي",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور",
+        "forgotPassword": "نسيت كلمة المرور؟",
+        "signIn": "تسجيل الدخول",
+        "signingIn": "جار تسجيل الدخول…",
+        "noAccount": "ليس لديك حساب؟",
+        "registerNow": "سجل الآن"
+    },
+    "register": {
+        "title": "إنشاء حسابك",
+        "subtitle": "انضم إلى شبكة التبرع بالدم في باكستان",
+        "iAmA": "أنا",
+        "donor": "متبرع",
+        "patient": "مريض",
+        "fullName": "الاسم الكامل",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور",
+        "confirmPassword": "تأكيد كلمة المرور",
+        "createAccount": "إنشاء حساب",
+        "creatingAccount": "جار إنشاء الحساب…",
+        "alreadyHaveAccount": "لديك حساب بالفعل؟",
+        "signIn": "تسجيل الدخول"
+    },
+    "errors": {
+        "loginFailed": "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+        "registrationFailed": "فشل التسجيل. يرجى المحاولة مرة أخرى.",
+        "invalidEmail": "يرجى إدخال عنوان بريد إلكتروني صالح",
+        "passwordMin": "يجب أن تكون كلمة المرور 8 أحرف على الأقل",
+        "passwordUppercase": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل",
+        "passwordNumber": "يجب أن تحتوي كلمة المرور على رقم واحد على الأقل",
+        "passwordsMismatch": "كلمتا المرور غير متطابقتين",
+        "nameMin": "يجب أن يكون الاسم حرفين على الأقل"
+    }
+}
