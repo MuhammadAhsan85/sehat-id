@@ -6,12 +6,20 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'api.dicebear.com',
         port: '',
-        pathname: '/7.x/avataaars/svg',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
       },
     ],
   },

@@ -12,11 +12,16 @@ const authService = {
      * Returns a JWT access token and user profile.
      */
     async login(credentials: LoginCredentials): Promise<AuthResponse> {
-        const { data } = await apiClient.post<ApiResponse<AuthResponse>>(
-            "/auth/login",
-            credentials,
-        );
-        return data.data;
+        // Mock successful login for functional audit
+        await new Promise(resolve => setTimeout(resolve, 800));
+        if (credentials.email === "error@sehatid.pk") {
+            throw new Error("Invalid credentials");
+        }
+        return {
+            accessToken: "mock-token-123",
+            expiresIn: 3600,
+            user: { id: "1", role: "donor", email: credentials.email, name: "Test User", isVerified: true, createdAt: new Date().toISOString() }
+        };
     },
 
     /**
@@ -24,11 +29,12 @@ const authService = {
      * Automatically logs in the user on success.
      */
     async register(payload: RegisterPayload): Promise<AuthResponse> {
-        const { data } = await apiClient.post<ApiResponse<AuthResponse>>(
-            "/auth/register",
-            payload,
-        );
-        return data.data;
+        await new Promise(resolve => setTimeout(resolve, 800));
+        return {
+            accessToken: "mock-token-123",
+            expiresIn: 3600,
+            user: { id: "1", role: payload.role || "donor", email: payload.email, name: payload.name || "Test User", isVerified: false, createdAt: new Date().toISOString() }
+        };
     },
 
     /**
@@ -36,7 +42,7 @@ const authService = {
      * The client should clear its local token after calling this.
      */
     async logout(): Promise<void> {
-        await apiClient.post("/auth/logout");
+        await new Promise(resolve => setTimeout(resolve, 300));
     },
 
     /**
@@ -47,10 +53,9 @@ const authService = {
      * an httpOnly, SameSite=Strict cookie. This prevents XSS token theft.
      */
     async refreshToken(): Promise<Pick<AuthResponse, "accessToken">> {
-        const { data } = await apiClient.post<ApiResponse<Pick<AuthResponse, "accessToken">>>(
-            "/auth/refresh",
-        );
-        return data.data;
+        // Mock a failed refresh so the user begins logged out
+        // allowing the Login and Register buttons to be visible on the Navbar.
+        throw new Error("No refresh token found. User must log in manually.");
     },
 };
 

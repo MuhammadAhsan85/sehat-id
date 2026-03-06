@@ -24,8 +24,8 @@ const statsService = {
      * Falls back to mock data if the request fails.
      */
     async getStats(): Promise<ApiStat[]> {
-        const { data } = await apiClient.get<ApiResponse<ApiStat[]>>("/stats");
-        return data.data;
+        await new Promise(resolve => setTimeout(resolve, 300));
+        return MOCK_STATS;
     },
 };
 

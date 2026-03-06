@@ -1,11 +1,44 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 export default function ImpactStorySection() {
     const t = useTranslations("home.stories");
+    const [avatarError, setAvatarError] = useState(false);
+    const [avatarFallbackError, setAvatarFallbackError] = useState(false);
+    const [featuredError, setFeaturedError] = useState(false);
+    const [featuredFallbackError, setFeaturedFallbackError] = useState(false);
+
+    // Fallback data if translations are missing or incomplete
+    const storyName = t("story1.name") || "Ahmed Raza";
+    const storyLocation = t("story1.location") || "Karachi";
+    const storyText = t("story1.text") || "Finding O-negative blood at 2 AM seemed impossible. SehatID connected us with a verified donor in under 15 minutes. Truly a life-saver.";
+
+    const handleAvatarError = () => {
+        if (!avatarError) {
+            setAvatarError(true);
+        } else {
+            setAvatarFallbackError(true);
+        }
+    };
+
+    const handleFeaturedError = () => {
+        if (!featuredError) {
+            setFeaturedError(true);
+        } else {
+            setFeaturedFallbackError(true);
+        }
+    };
+    // Use Dicebear 9.x which is more reliable
+    const avatarSrc = avatarError
+        ? `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(storyName)}&backgroundColor=c41c1c`
+        : `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(storyName)}&backgroundColor=b6e3f4`;
+    const featuredSrc = featuredError
+        ? "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=800" // Emergency hospital room
+        : "https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=800"; // Working unsplash image
 
     return (
         <section className="bg-slate-50 py-24 lg:py-32 overflow-hidden">
@@ -19,13 +52,13 @@ export default function ImpactStorySection() {
                         transition={{ duration: 0.8 }}
                     >
                         <span className="inline-block rounded-full bg-red-100 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#C41C1C] mb-6">
-                            {t("badge")}
+                            {t("badge") || "Impact Stories"}
                         </span>
                         <h2 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl mb-6">
-                            {t("title")}
+                            {t("title") || "Real People. Real Impact."}
                         </h2>
                         <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                            {t("subtitle")}
+                            {t("subtitle") || "Connecting donors with patients is more than just data—it's about saving lives across Pakistan."}
                         </p>
 
                         <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 relative">
@@ -37,16 +70,29 @@ export default function ImpactStorySection() {
                             </div>
 
                             <p className="text-xl italic text-slate-800 mb-8 relative z-10">
-                                "{t("story1.text")}"
+                                "{storyText}"
                             </p>
 
                             <div className="flex items-center gap-4">
-                                <div className="h-12 w-12 rounded-full bg-slate-200 overflow-hidden">
-                                    <Image src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ahmed" alt="Ahmed" width={48} height={48} />
+                                <div className="h-12 w-12 rounded-full bg-slate-200 overflow-hidden relative">
+                                    {avatarFallbackError ? (
+                                        <div className="h-full w-full bg-red-500 flex items-center justify-center text-white font-black text-lg">
+                                            {storyName.charAt(0)}
+                                        </div>
+                                    ) : (
+                                        <Image
+                                            src={avatarSrc}
+                                            alt={storyName}
+                                            width={48}
+                                            height={48}
+                                            onError={handleAvatarError}
+                                            className="object-cover"
+                                        />
+                                    )}
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-slate-900">{t("story1.name")}</h4>
-                                    <p className="text-sm text-slate-500">{t("story1.location")}, Pakistan</p>
+                                    <h4 className="font-bold text-slate-900">{storyName}</h4>
+                                    <p className="text-sm text-slate-500">{storyLocation}, Pakistan</p>
                                 </div>
                             </div>
                         </div>
@@ -61,12 +107,24 @@ export default function ImpactStorySection() {
                         className="relative"
                     >
                         <div className="aspect-[4/3] rounded-[40px] bg-red-100 overflow-hidden relative shadow-2xl">
-                            <Image
-                                src="https://images.unsplash.com/photo-1579152276503-6090709f195d?auto=format&fit=crop&q=80&w=800"
-                                alt="Medical Support"
-                                fill
-                                className="object-cover"
-                            />
+                            {featuredFallbackError ? (
+                                <div className="h-full w-full bg-gradient-to-br from-[#C41C1C] to-[#911616] flex items-center justify-center p-12 text-center">
+                                    <div className="text-white">
+                                        <svg className="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                        <p className="text-lg font-bold">Supporting Healthcare Nationwide</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <Image
+                                    src={featuredSrc}
+                                    alt="Medical Support"
+                                    fill
+                                    className="object-cover"
+                                    onError={handleFeaturedError}
+                                />
+                            )}
                             {/* Overlay glass card */}
                             <div className="absolute bottom-6 left-6 right-6 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 text-white">
                                 <p className="text-sm font-medium mb-1">Impact Made</p>

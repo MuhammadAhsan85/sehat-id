@@ -17,7 +17,7 @@ export default function Navbar() {
     const pathname = usePathname();
     const { isAuthenticated, user } = useAuth();
     const [menuOpen, setMenuOpen] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
+    const headerRef = useRef<HTMLElement>(null);
 
     // Desktop navigation links translated
     const navLinks: NavLink[] = [
@@ -36,7 +36,7 @@ export default function Navbar() {
     // Close mobile menu on outside click
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+            if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
                 setMenuOpen(false);
             }
         }
@@ -54,14 +54,18 @@ export default function Navbar() {
     }, []);
 
     return (
-        <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/95 backdrop-blur-sm">
+        <header
+            className="fixed top-0 left-0 right-0 z-[100] w-full bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300"
+            ref={headerRef}
+        >
             <nav
                 className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8"
                 aria-label={t("aria.mainNav")}
-                ref={menuRef}
             >
                 {/* ── Logo ── */}
-                <Logo fontSize="text-xl" iconWidth={24} iconHeight={24} />
+                <div className="flex-shrink-0">
+                    <Logo />
+                </div>
 
                 {/* ── Desktop nav links ── */}
                 <ul className="hidden items-center gap-8 md:flex" role="list">

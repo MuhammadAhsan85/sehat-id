@@ -28,7 +28,7 @@ export default function HomePage() {
             <Navbar />
 
             {/* Main content area */}
-            <main className="flex-grow">
+            <main className="flex-grow pt-20 md:pt-24">
                 {/* Hero banner with SEO optimized copy and Search Widget */}
                 <HeroSection />
 

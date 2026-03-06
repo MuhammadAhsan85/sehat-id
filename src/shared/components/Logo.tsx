@@ -14,23 +14,26 @@ interface LogoProps {
 
 export default function Logo({
     className = "",
-    iconWidth = 32,
-    iconHeight = 32,
-    fontSize = "text-xl",
+    fontSize = "text-xl md:text-2xl",
 }: LogoProps) {
     const t = useTranslations("navbar");
 
     return (
-        <Link href={ROUTES.HOME} className={`flex items-center gap-2 ${className}`} aria-label={t("links.home") || "SehatID Home"}>
-            <Image
-                src="/logo.svg"
-                alt=""
-                width={iconWidth}
-                height={iconHeight}
-                className="w-auto h-auto"
-                priority
-            />
-            <span className={`${fontSize} font-bold tracking-tight`}>
+        <Link
+            href={ROUTES.HOME}
+            className={`flex items-center gap-2.5 group ${className}`}
+            aria-label={t("links.home") || "SehatID Home"}
+        >
+            <div className="relative w-8 h-8 md:w-10 md:h-10 flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
+                <Image
+                    src="/logo.svg"
+                    alt=""
+                    fill
+                    className="object-contain"
+                    priority
+                />
+            </div>
+            <span className={`${fontSize} font-bold tracking-tight flex items-center`}>
                 <span className="text-slate-900">Sehat</span>
                 <span className="text-[#C41C1C]">ID</span>
             </span>

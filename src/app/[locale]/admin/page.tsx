@@ -122,13 +122,13 @@ export default function AdminDashboardPage() {
                                 { label: "Requests", active: false },
                                 { label: "Emergencies", active: false },
                             ].map(({ label, active }) => (
-                                <a
+                                <button
                                     key={label}
-                                    href="#"
+                                    type="button"
                                     className={`py-5 border-b-2 transition-colors ${active ? "text-[#C41C1C] border-[#C41C1C]" : "text-gray-500 border-transparent hover:text-gray-900"}`}
                                 >
                                     {label}
-                                </a>
+                                </button>
                             ))}
                         </nav>
 
@@ -252,9 +252,9 @@ export default function AdminDashboardPage() {
                                 </table>
                             </div>
                             <div className="p-4 bg-gray-50/50 border-t border-gray-100">
-                                <a href="#" className="text-sm font-bold text-[#C41C1C] hover:underline px-2">
+                                <Link href={ROUTES.ADMIN} className="text-sm font-bold text-[#C41C1C] hover:underline px-2">
                                     View all activities →
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     </div>
