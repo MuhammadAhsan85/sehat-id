@@ -86,6 +86,7 @@ const jsonLd = {
 import { Toaster } from "sonner";
 import Navbar from "@/shared/components/Navbar";
 import Footer from "@/shared/components/Footer";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default async function RootLayout({
   children,
@@ -132,6 +133,7 @@ export default async function RootLayout({
             />
           </AuthProvider>
         </NextIntlClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
