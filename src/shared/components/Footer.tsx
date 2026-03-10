@@ -125,7 +125,7 @@ export default function Footer() {
                         {t("bottom.rights")}
                     </p>
                     <div className="flex items-center gap-6">
-                        <Link href="/admin" className="rounded-full bg-white border-2 border-slate-200 px-6 py-2 text-xs font-bold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 flex items-center gap-1.5">
+                        <Link href={ROUTES.ADMIN} className="rounded-full bg-white border-2 border-slate-200 px-6 py-2 text-xs font-bold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 flex items-center gap-1.5">
                             <svg width="11" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                                 <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
                             </svg>

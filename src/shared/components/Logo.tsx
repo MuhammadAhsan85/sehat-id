@@ -15,6 +15,8 @@ interface LogoProps {
 export default function Logo({
     className = "",
     fontSize = "text-xl md:text-2xl",
+    iconWidth,
+    iconHeight,
 }: LogoProps) {
     const t = useTranslations("navbar");
 
@@ -24,11 +26,12 @@ export default function Logo({
             className={`flex items-center gap-2.5 group ${className}`}
             aria-label={t("links.home") || "SehatID Home"}
         >
-            <div className="relative w-8 h-8 md:w-10 md:h-10 flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
+            <div className="relative flex-shrink-0 transition-transform duration-300 group-hover:scale-110" style={{ width: iconWidth || 32, height: iconHeight || 32 }}>
                 <Image
                     src="/logo.svg"
                     alt=""
-                    fill
+                    width={iconWidth || 32}
+                    height={iconHeight || 32}
                     className="object-contain"
                     priority
                 />
