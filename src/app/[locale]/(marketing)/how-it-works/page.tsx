@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
+import { Link } from "@/i18n/navigation";
 import { ROUTES } from "@/constants/routes";
 
 export const metadata: Metadata = {
@@ -58,11 +56,10 @@ const STEPS = [
 export default function HowItWorksPage() {
     return (
         <>
-            <Navbar />
             <main className="min-h-screen bg-[#f8f6f6]">
 
                 {/* ── Single unified header ── */}
-                <section className="px-4 pt-20 pb-16 text-center sm:px-6 lg:px-8">
+                <section className="px-4 py-20 text-center sm:px-6 lg:px-8">
                     <span className="inline-block rounded-full border border-red-200 bg-red-50 px-4 py-1.5 text-xs font-bold tracking-widest text-[#C41C1C]">
                         SIMPLE. FAST. SAFE.
                     </span>
@@ -131,7 +128,6 @@ export default function HowItWorksPage() {
                     </div>
                 </section>
             </main>
-            <Footer />
         </>
     );
 }

@@ -22,7 +22,7 @@ export function useDonorSearch() {
 
     /** Updates a single filter field and debounces the API fetch. */
     const updateFilter = useCallback(
-        (key: keyof DonorSearchFilters, value: DonorSearchFilters[typeof key]) => {
+        (key: keyof DonorSearchFilters, value: any) => {
             setFilters({ [key]: value });
 
             if (debounceTimer.current) clearTimeout(debounceTimer.current);

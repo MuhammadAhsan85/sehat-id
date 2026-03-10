@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
 
 export const metadata: Metadata = {
     title: "Terms of Service | SehatID",
@@ -20,9 +18,8 @@ const TERMS = [
 export default function TermsPage() {
     return (
         <>
-            <Navbar />
-            <main className="min-h-screen bg-[#f8f6f6]">
-                <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+            <main className="flex-1 flex flex-col items-center bg-[#f8f6f6] py-12 px-4 sm:px-6 w-full">
+                <div className="mx-auto max-w-3xl w-full">
                     <div className="mb-10">
                         <p className="text-sm font-semibold uppercase tracking-widest text-[#C41C1C]">Legal</p>
                         <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-gray-900">Terms of Service</h1>
@@ -38,7 +35,6 @@ export default function TermsPage() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </>
     );
 }

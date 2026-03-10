@@ -12,6 +12,8 @@ export interface Donor {
     lastDonationDate: string | null;
     donationCount: number;
     isVerified: boolean;
+    isUrgent: boolean;
+    phone?: string;
 }
 
 /** Filters used in the donor search UI and API query. */
@@ -20,6 +22,8 @@ export interface DonorSearchFilters {
     city: string;
     province: string;
     availableOnly: boolean;
+    isUrgent: boolean;
+    distance?: number;
     page: number;
     limit: number;
 }

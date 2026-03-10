@@ -6,7 +6,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { COUNTRIES, DEFAULT_LOCALE, LOCALE_DIR } from "@/i18n/config";
 import type { Locale, LanguageOption } from "@/i18n/config";
 import { STORAGE_COUNTRY_KEY, STORAGE_LOCALE_KEY } from "./CountrySelector";

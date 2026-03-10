@@ -20,7 +20,7 @@ const authService = {
         return {
             accessToken: "mock-token-123",
             expiresIn: 3600,
-            user: { id: "1", role: "donor", email: credentials.email, name: "Test User", isVerified: true, createdAt: new Date().toISOString() }
+            user: { id: "1", role: "donor", email: credentials.email, name: "Test User", isVerified: true, registrationStep: 3, isProfileComplete: true, createdAt: new Date().toISOString() }
         };
     },
 
@@ -33,7 +33,7 @@ const authService = {
         return {
             accessToken: "mock-token-123",
             expiresIn: 3600,
-            user: { id: "1", role: payload.role || "donor", email: payload.email, name: payload.name || "Test User", isVerified: false, createdAt: new Date().toISOString() }
+            user: { id: "1", role: payload.role || "donor", email: payload.email, name: payload.name || "Test User", isVerified: false, registrationStep: 1, isProfileComplete: false, createdAt: new Date().toISOString() }
         };
     },
 

@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { motion, Variants } from "framer-motion";
 import { useTranslations } from "next-intl";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
 import { ROUTES } from "@/constants/routes";
 
 const fadeIn: Variants = {
@@ -28,10 +26,9 @@ export default function AboutPage() {
 
     return (
         <>
-            <Navbar />
             <main className="bg-white text-slate-900 font-sans overflow-x-hidden">
                 {/* Hero Section */}
-                <section className="relative py-24 px-6 overflow-hidden">
+                <section className="relative py-20 px-6 overflow-hidden">
                     <div className="absolute inset-0 z-0" aria-hidden="true">
                         <div className="absolute inset-0 bg-gradient-to-b from-red-600/5 to-transparent"></div>
                         <motion.div
@@ -273,7 +270,6 @@ export default function AboutPage() {
                     </motion.div>
                 </section>
             </main>
-            <Footer />
         </>
     );
 }

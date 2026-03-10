@@ -4,10 +4,8 @@ import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import Link from "next/link";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
-import Toast from "@/shared/components/ui/Toast";
+import { Link } from "@/i18n/navigation";
+import { toast } from "sonner";
 import { ROUTES } from "@/constants/routes";
 
 const schema = z.object({
@@ -16,9 +14,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function ForgotPasswordPage() {
-    const [toast, setToast] = useState<string | null>(null);
     const [sent, setSent] = useState(false);
-    const dismissToast = useCallback(() => setToast(null), []);
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } =
         useForm<FormData>({ resolver: zodResolver(schema) });
@@ -28,15 +24,13 @@ export default function ForgotPasswordPage() {
         // Simulate network delay
         await new Promise((r) => setTimeout(r, 800));
         setSent(true);
-        setToast("Reset link sent! Check your inbox.");
+        toast.success("Reset link sent! Check your inbox.");
     }
 
     return (
         <>
-            <Navbar />
-            {toast && <Toast type="success" message={toast} onClose={dismissToast} />}
 
-            <main className="flex min-h-screen items-center justify-center bg-[#f8f6f6] px-4 py-16 sm:px-6">
+            <main className="flex items-center justify-center bg-[#f8f6f6] px-4 py-20 sm:px-6 min-h-[calc(100vh-80px)]">
                 <div className="w-full max-w-md animate-fade-up">
                     <div className="mb-8 text-center">
                         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#C41C1C]">
@@ -106,7 +100,6 @@ export default function ForgotPasswordPage() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </>
     );
 }

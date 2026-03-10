@@ -24,6 +24,7 @@ const DEFAULT_FILTERS: DonorSearchFilters = {
     bloodGroup: "",
     city: "",
     province: "",
+    isUrgent: false,
     availableOnly: false,
     page: 1,
     limit: 12,

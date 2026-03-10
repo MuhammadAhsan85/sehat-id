@@ -1,9 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { ROUTES } from "@/constants/routes";
@@ -24,8 +22,7 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen flex flex-col bg-[#fdfdfd]">
-            <Navbar />
-            <main id="main-content" className="flex-1 mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-16">
+            <main id="main-content" className="flex-1 mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-20">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -120,7 +117,6 @@ export default function ProfilePage() {
                     </div>
                 </motion.div>
             </main>
-            <Footer />
         </div>
     );
 }

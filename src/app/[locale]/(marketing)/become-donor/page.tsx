@@ -4,8 +4,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
 import { BLOOD_GROUPS, PROVINCES } from "@/constants/site";
 import type { BloodGroup } from "@/types/donor";
 
@@ -63,7 +61,6 @@ export default function BecomeDonorPage() {
     if (submitted) {
         return (
             <>
-                <Navbar />
                 <main className="flex min-h-screen items-center justify-center bg-[#f8f6f6] px-4">
                     <div className="max-w-md animate-fade-up text-center">
                         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
@@ -75,16 +72,14 @@ export default function BecomeDonorPage() {
                         <p className="text-gray-500">Thank you for joining Pakistan&apos;s blood donor network. Your profile will be reviewed within 24 hours.</p>
                     </div>
                 </main>
-                <Footer />
             </>
         );
     }
 
     return (
         <>
-            <Navbar />
             <main className="min-h-screen bg-[#f8f6f6]">
-                <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6 lg:px-8">
 
                     {/* Progress */}
                     <nav aria-label="Registration steps" className="mb-10">
@@ -174,7 +169,6 @@ export default function BecomeDonorPage() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </>
     );
 }

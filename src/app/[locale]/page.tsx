@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Navbar from "@/shared/components/Navbar";
 import HeroSection from "./home/components/HeroSection";
 import TrustBannerSection from "./home/components/TrustBannerSection";
 import ProcessSnippetSection from "./home/components/ProcessSnippetSection";
@@ -7,7 +6,6 @@ import FeaturesSection from "./home/components/FeaturesSection";
 import EmergencyBannerSection from "./home/components/EmergencyBannerSection";
 import FinalCTASection from "./home/components/FinalCTASection";
 import ImpactStorySection from "./home/components/ImpactStorySection";
-import Footer from "@/shared/components/Footer";
 
 export const metadata: Metadata = {
     title: "SehatID | Pakistan's Most Trusted Emergency Blood Network",
@@ -24,11 +22,8 @@ export const metadata: Metadata = {
 export default function HomePage() {
     return (
         <div className="flex flex-col min-h-screen bg-white">
-            {/* Top navigation bar */}
-            <Navbar />
-
             {/* Main content area */}
-            <main className="flex-grow pt-20 md:pt-24">
+            <main className="flex-grow">
                 {/* Hero banner with SEO optimized copy and Search Widget */}
                 <HeroSection />
 
@@ -50,9 +45,6 @@ export default function HomePage() {
                 {/* Final strong closing banner */}
                 <FinalCTASection />
             </main>
-
-            {/* Footer with links and contact info */}
-            <Footer />
         </div>
     );
 }

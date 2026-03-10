@@ -1,4 +1,5 @@
 // FooterColumn — reusable column for footer nav sections
+import { Link } from "@/i18n/navigation";
 
 interface FooterLink {
     label: string;
@@ -17,12 +18,12 @@ export default function FooterColumn({ heading, links }: FooterColumnProps) {
             <ul className="flex flex-col gap-3">
                 {links.map((link) => (
                     <li key={link.label}>
-                        <a
+                        <Link
                             href={link.href ?? "#"}
                             className="text-sm text-slate-600 transition-colors hover:text-[#d61f1f] focus-visible:outline-2 focus-visible:outline-[#d61f1f] focus-visible:outline-offset-2 rounded"
                         >
                             {link.label}
-                        </a>
+                        </Link>
                     </li>
                 ))}
             </ul>

@@ -1,303 +1,438 @@
 "use client";
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from 'react';
 import {
-    Bell, User, MapPin, Clock,
-    ChevronRight, CheckCircle2, Droplets,
-    AlertCircle, Phone, Navigation, MoreHorizontal,
-    LayoutDashboard, Heart, History, Settings, LogOut
+    MapPin, User, Clock, Share2, Edit3,
+    CheckCircle2, Bell, Phone, Map, ChevronRight, Activity, Droplets, Navigation
 } from 'lucide-react';
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
-import { ROUTES } from "@/constants/routes";
-import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function RequestTrackingPage() {
-    const { user } = useAuth();
-    const t = useTranslations();
-    const [activeStep] = useState(2); // 0: Requested, 1: Finding Matches, 2: Donor On the Way, 3: Completed
+interface ActivityItem {
+    time: string;
+    text: string;
+    active: boolean;
+    isAI?: boolean;
+}
 
-    const timelineSteps = [
-        { title: t('tracking.timeline.received'), time: '10:30 AM', status: 'completed' },
-        { title: t('tracking.timeline.finding'), time: '10:45 AM', status: 'completed' },
-        { title: t('tracking.timeline.committed'), time: '11:15 AM', status: 'active' },
-        { title: t('tracking.timeline.transfusion'), time: t('tracking.timeline.pending'), status: 'upcoming' },
-    ];
+interface RequestDetails {
+    id: string;
+    bloodGroup: string;
+    hospital: string;
+    location: string;
+    patient: string;
+    postedAt: string;
+    units: number;
+    isUrgent: boolean;
+}
 
-    const activityLog = [
-        { id: 1, action: t('tracking.activity.requestCreated'), time: '2 hours ago', icon: <Droplets className="text-[#C41C1C]" size={14} />, color: 'bg-red-50' },
-        { id: 2, action: t('tracking.activity.matchesNotified', { count: 5 }), time: '1.5 hours ago', icon: <Bell className="text-blue-500" size={14} />, color: 'bg-blue-50' },
-        { id: 3, action: t('tracking.activity.donorAccepted', { name: 'Ahmed R.' }), time: '45 mins ago', icon: <CheckCircle2 className="text-green-500" size={14} />, color: 'bg-green-50' },
-        { id: 4, action: t('tracking.activity.donorDistance', { distance: '2.4km' }), time: 'Just now', icon: <Navigation className="text-orange-500" size={14} />, color: 'bg-orange-50' },
-    ];
+interface Match {
+    id: string;
+    name: string;
+    distance: string;
+    status: 'OPEN' | 'PENDING_APPROVAL' | 'ACCEPTED';
+    avatar: string;
+    phone: string;
+    isVerified?: boolean;
+    isElite?: boolean;
+}
 
-    const matches = [
-        { id: 1, name: 'Ahmed R.', distance: '2.4 km', eta: '8 mins', status: 'On the way' },
-        { id: 2, name: 'Sara K.', distance: '3.8 km', eta: 'Matched', status: 'Available' },
-    ];
+export default function RequestTrackingPage({ params }: { params: Promise<{ id: string, locale: string }> }) {
+    // --- Dynamic State ---
+    const [requestId, setRequestId] = useState<string>("");
+    const [request, setRequest] = useState<RequestDetails | null>(null);
+    const [activities, setActivities] = useState<ActivityItem[]>([]);
+    const [matches, setMatches] = useState<Match[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const sidebarLinks = [
-        { icon: <LayoutDashboard size={18} />, label: t('sidebar.dashboard'), href: ROUTES.DASHBOARD, active: false },
-        { icon: <Heart size={18} />, label: t('sidebar.requests'), href: '#', active: true },
-        { icon: <History size={18} />, label: t('sidebar.history'), href: '#', active: false },
-        { icon: <Settings size={18} />, label: t('sidebar.settings'), href: '#', active: false },
-    ];
+    useEffect(() => {
+        async function fetchData() {
+            const { id } = await params;
+            setRequestId(id);
+
+            // Simulate API Fetch
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            setRequest({
+                id: id,
+                bloodGroup: "B+",
+                hospital: "Aga Khan Hospital",
+                location: "Stadium Road, Gulshan-e-Iqbal, Karachi, Pakistan",
+                patient: "Ahmed Raza (MR 8821)",
+                postedAt: "45 mins ago",
+                units: 2,
+                isUrgent: true
+            });
+
+            setActivities([
+                { time: '14:35', text: 'Donor Sara K. accepted request.', active: true },
+                { time: '14:25', text: 'Donor notified in Gulshan-e-Iqbal.', active: false },
+                { time: '14:22', text: 'AI matched 8 compatible donors.', active: true, isAI: true },
+                { time: '14:15', text: `Blood request #${id} published.`, active: false },
+            ]);
+
+            setMatches([
+                { id: '1', name: 'Sara K.', distance: '4.5km', status: 'ACCEPTED', avatar: 'Sara', phone: '+92 300 1234567', isVerified: true },
+                { id: '2', name: 'Ali R.', distance: '2.1km', status: 'OPEN', avatar: 'Ali', phone: '+92 321 7654321', isElite: true },
+            ]);
+
+            setIsLoading(false);
+        }
+        fetchData();
+    }, [params]);
+
+    // --- Handlers ---
+    const handleShare = async () => {
+        const url = window.location.href;
+        try {
+            await navigator.clipboard.writeText(url);
+            toast.success("Link copied to clipboard!");
+        } catch (err) {
+            toast.error("Failed to copy link.");
+        }
+    };
+
+    const handleCall = (name: string) => {
+        toast.info(`Initiating secure call to ${name}...`);
+    };
+
+    const handleRequestConnection = (matchId: string) => {
+        setMatches(matches.map(m => m.id === matchId ? { ...m, status: 'PENDING_APPROVAL' } : m));
+        toast.info("Connection request sent to donor. Waiting for approval.");
+    };
+
+    // Simulated Donor Action for Demo Purposes
+    const handleDonorApprove = (matchId: string) => {
+        setMatches(matches.map(m => m.id === matchId ? { ...m, status: 'ACCEPTED' } : m));
+        toast.success("Donor has approved your request!");
+    };
+
+    const handleViewLocation = (name: string) => {
+        toast.info(`Opening live map for ${name}...`);
+    };
+
+    const handleEdit = () => {
+        toast.info("Opening request editor...");
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-[80vh] flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-[#C41C1C] border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-slate-500 font-bold animate-pulse tracking-widest uppercase text-xs">Loading Live Data...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="min-h-screen bg-[#fdfdfd] font-sans">
-            <Navbar />
+        <div className="min-h-screen bg-[#FAFAFA] font-sans text-slate-900 selection:bg-red-100 selection:text-red-900">
 
-            <div className="max-w-[1440px] mx-auto flex h-full min-h-[calc(100vh-72px)]">
+            {/* Main Content Area */}
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-                {/* DASHBOARD SIDEBAR (DESKTOP) */}
-                <aside className="hidden lg:flex w-80 border-r border-slate-100 bg-white flex-col p-8 sticky top-[72px] h-[calc(100vh-72px)] shadow-[1px_0_10px_rgba(0,0,0,0.02)]">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-4 p-5 bg-slate-50/50 rounded-3xl mb-10 border border-slate-100"
-                    >
-                        <Image
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || "User"}`}
-                            width={48}
-                            height={48}
-                            className="w-12 h-12 rounded-2xl bg-slate-200 border-2 border-white shadow-sm"
-                            alt="Profile"
-                        />
-                        <div>
-                            <p className="text-sm font-black text-slate-900">{user?.name || "Donor"}</p>
-                            <p className="text-[10px] font-black text-[#C41C1C] uppercase tracking-widest">{t('sidebar.premium')}</p>
+                {/* Page Title & Actions */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-6">
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                        <div className="flex items-center text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
+                            <span>Dashboard</span>
+                            <ChevronRight size={14} className="mx-1" />
+                            <span className="text-slate-800">Request Status #{requestId}</span>
                         </div>
+                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Request Tracking</h1>
+                        <p className="text-slate-500 font-medium mt-1">Monitoring Live Blood Request for {request?.hospital}</p>
                     </motion.div>
 
-                    <nav className="space-y-2 flex-1">
-                        {sidebarLinks.map((link) => (
-                            <Link
-                                key={link.label}
-                                href={link.href}
-                                className={`flex items-center gap-4 p-4 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest ${link.active
-                                    ? 'text-white bg-[#C41C1C] shadow-xl shadow-red-100 border-2 border-[#C41C1C]'
-                                    : 'text-slate-400 hover:bg-slate-50 hover:text-slate-900 border-2 border-transparent'
-                                    }`}
-                            >
-                                {link.icon} {link.label}
-                            </Link>
-                        ))}
-                    </nav>
+                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+                        <button
+                            onClick={handleShare}
+                            className="flex-1 md:flex-none rounded-full bg-white border-2 border-slate-200 px-6 py-2.5 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 flex items-center justify-center gap-2 shadow-sm"
+                        >
+                            <Share2 size={16} />
+                            Share Request
+                        </button>
+                        <button
+                            onClick={handleEdit}
+                            className="flex-1 md:flex-none rounded-full bg-[#C41C1C] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-red-200 transition-all hover:bg-[#A01717] hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                        >
+                            <Edit3 size={16} />
+                            Edit Request
+                        </button>
+                    </div>
+                </div>
 
-                    <button className="flex items-center gap-4 text-slate-400 p-4 hover:text-[#C41C1C] transition-all font-black text-[10px] uppercase tracking-widest mt-auto border-t border-slate-50 pt-8 group">
-                        <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" /> {t('sidebar.logout')}
-                    </button>
-                </aside>
+                {/* Dashboard Grid Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                {/* MAIN DASHBOARD CONTENT */}
-                <main className="flex-1 p-4 lg:p-12 overflow-y-auto">
+                    {/* LEFT COLUMN (1/3 Width) */}
+                    <div className="space-y-6">
 
-                    {/* Breadcrumbs */}
-                    <div className="flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-10 ml-2">
-                        <span>{t('sidebar.dashboard')}</span>
-                        <ChevronRight size={14} className="text-slate-200" />
-                        <span className="text-[#C41C1C]">{t('tracking.breadcrumb')} #REQ-2941</span>
+                        {/* Request Details Card */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                            className="bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm"
+                        >
+                            {/* Top Red Section */}
+                            <div className="bg-[#C41C1C] py-8 text-center text-white relative">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                                <h2 className="text-6xl font-black mb-1 relative z-10">{request?.bloodGroup}</h2>
+                                <p className="text-xs font-bold tracking-widest uppercase opacity-90 relative z-10">Blood Group Required</p>
+                            </div>
+
+                            {/* Bottom White Section */}
+                            <div className="p-6">
+                                <div className="flex gap-2 mb-4">
+                                    {request?.isUrgent && <span className="bg-red-50 text-[#C41C1C] px-3 py-1 rounded-full text-xs font-black tracking-wider">URGENT</span>}
+                                    <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-black tracking-wider">{request?.units} Units</span>
+                                </div>
+
+                                <h3 className="text-xl font-extrabold text-slate-900 mb-5">{request?.hospital}</h3>
+
+                                <div className="space-y-4 text-sm font-medium text-slate-600">
+                                    <div className="flex items-start gap-3">
+                                        <MapPin size={18} className="text-[#C41C1C] shrink-0 mt-0.5" />
+                                        <p className="leading-snug">{request?.location}</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <User size={18} className="text-[#C41C1C] shrink-0" />
+                                        <p>Patient: {request?.patient}</p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Clock size={18} className="text-[#C41C1C] shrink-0" />
+                                        <p>Posted {request?.postedAt}</p>
+                                    </div>
+                                </div>
+
+                                <div className="pt-6 mt-6 border-t border-slate-100 text-center">
+                                    <button className="text-[#C41C1C] font-bold text-sm hover:text-[#A01717] transition-colors hover:underline">
+                                        View Medical Docs
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+
+                        {/* Activity Log Card */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                            className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm"
+                        >
+                            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                                <Activity size={18} className="text-[#C41C1C]" />
+                                Activity Log
+                            </h3>
+
+                            <div className="relative border-l-2 border-slate-100 ml-3 space-y-6">
+                                {activities.map((activity, idx) => (
+                                    <div key={idx} className="relative pl-6">
+                                        {/* Timeline Node */}
+                                        <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-4 border-white ${activity.active ? 'bg-[#C41C1C]' : 'bg-slate-300'}`}></div>
+
+                                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className={`text-sm ${activity.active ? 'font-bold text-slate-900' : 'font-medium text-slate-600'}`}>
+                                                    {activity.text}
+                                                </p>
+                                                {activity.isAI && (
+                                                    <motion.div
+                                                        animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
+                                                        transition={{ repeat: Infinity, duration: 2 }}
+                                                    >
+                                                        <span className="bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">AI MATCH</span>
+                                                    </motion.div>
+                                                )}
+                                            </div>
+                                            <span className="text-xs font-bold text-slate-400 shrink-0">{activity.time}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+
                     </div>
 
-                    <div className="grid lg:grid-cols-12 gap-10">
+                    {/* RIGHT COLUMN (2/3 Width) */}
+                    <div className="lg:col-span-2 space-y-6">
 
-                        {/* Left Column: Request Details & Timeline */}
-                        <div className="lg:col-span-8 space-y-10">
+                        {/* Live Status Timeline Card */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+                            className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm overflow-x-auto no-scrollbar"
+                        >
+                            <h3 className="text-lg font-bold text-slate-800 mb-8">Live Status Timeline</h3>
 
-                            {/* Request Summary Card */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6 }}
-                                className="bg-white rounded-[3rem] p-10 shadow-2xl shadow-slate-200/50 relative overflow-hidden border border-slate-100 group"
-                            >
-                                <div className="absolute top-0 right-0 w-48 h-48 bg-red-50/50 rounded-bl-[6rem] -mr-12 -mt-12 transition-all duration-700 group-hover:scale-110"></div>
-                                <Droplets className="absolute top-8 right-8 text-[#C41C1C] opacity-10" size={64} />
+                            <div className="relative flex justify-between min-w-[600px] mb-4 px-4">
+                                {/* Connecting Line */}
+                                <div className="absolute top-5 left-10 right-10 h-1 bg-slate-100 -z-10"></div>
+                                <div className="absolute top-5 left-10 w-1/2 h-1 bg-[#C41C1C] -z-10"></div> {/* Progress Line */}
 
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 relative z-10">
-                                    <div className="flex items-center gap-8">
-                                        <div className="w-24 h-24 rounded-3xl bg-[#C41C1C] text-white flex items-center justify-center font-black text-4xl shadow-xl shadow-red-200 rotate-2">
-                                            B+
-                                        </div>
-                                        <div>
-                                            <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">{t('tracking.emergency')}</h2>
-                                            <p className="text-slate-500 font-bold flex items-center gap-2 text-sm">
-                                                <MapPin size={18} className="text-[#C41C1C]" /> Aga Khan Hospital, Karachi
-                                            </p>
-                                        </div>
+                                {/* Status 1: Completed */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-10 h-10 rounded-full bg-[#C41C1C] text-white flex items-center justify-center mb-3 shadow-md shadow-red-200">
+                                        <CheckCircle2 size={20} />
                                     </div>
-                                    <div className="bg-emerald-50 text-emerald-600 px-6 py-2.5 rounded-2xl text-[10px] font-black tracking-widest uppercase flex items-center gap-2 border border-emerald-100 h-fit">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> {t('tracking.searching')}
+                                    <span className="text-[10px] font-black text-[#C41C1C] uppercase tracking-widest mb-1">Completed</span>
+                                    <span className="text-sm font-bold text-slate-800 text-center">Request Posted</span>
+                                </div>
+
+                                {/* Status 2: Completed */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-10 h-10 rounded-full bg-[#C41C1C] text-white flex items-center justify-center mb-3 shadow-md shadow-red-200">
+                                        <CheckCircle2 size={20} />
                                     </div>
+                                    <span className="text-[10px] font-black text-[#C41C1C] uppercase tracking-widest mb-1">Completed</span>
+                                    <span className="text-sm font-bold text-slate-800 text-center">AI Matching</span>
                                 </div>
 
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-10 border-t border-slate-100 relative z-10">
-                                    {[
-                                        { label: t('tracking.patient'), value: 'Mrs. Shamim B.' },
-                                        { label: t('tracking.requiredUnits'), value: t('tracking.units', { count: 2 }) },
-                                        { label: t('tracking.requestDate'), value: 'Oct 24, 2024' },
-                                        { label: t('tracking.urgency'), value: t('tracking.immediate'), accent: true },
-                                    ].map((item) => (
-                                        <div key={item.label}>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{item.label}</p>
-                                            <p className={`text-sm font-black ${item.accent ? 'text-[#C41C1C]' : 'text-slate-900'}`}>{item.value}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </motion.div>
-
-                            {/* Live Status Timeline */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6, delay: 0.2 }}
-                                className="bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100"
-                            >
-                                <div className="flex items-center justify-between mb-12">
-                                    <h3 className="text-slate-900 font-black text-xl flex items-center gap-4 tracking-tight">
-                                        {t('tracking.liveTitle')} <span className="text-[10px] font-black bg-[#C41C1C]/5 text-[#C41C1C] px-4 py-1.5 rounded-xl uppercase tracking-widest border border-red-100 italic">{t('tracking.realtime')}</span>
-                                    </h3>
-                                    <p className="text-slate-300 text-[10px] font-black uppercase tracking-widest">ID: #TRK-8821</p>
-                                </div>
-
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative gap-10">
-                                    {/* Timeline connecting line */}
-                                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-slate-50 -translate-y-9"></div>
-
-                                    {timelineSteps.map((step, idx) => (
-                                        <div key={idx} className="flex md:flex-col items-center gap-5 relative z-10 flex-1">
-                                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-700 ${step.status === 'completed' ? 'bg-[#C41C1C] text-white shadow-xl shadow-red-100 border-2 border-[#C41C1C]' :
-                                                step.status === 'active' ? 'bg-white text-[#C41C1C] ring-8 ring-[#C41C1C]/5 scale-110 shadow-2xl border-4 border-[#C41C1C]' :
-                                                    'bg-slate-50 text-slate-300 border-2 border-slate-100'
-                                                }`}>
-                                                {step.status === 'completed' ? <CheckCircle2 size={24} /> : <Droplets size={24} />}
-                                            </div>
-                                            <div className="text-left md:text-center">
-                                                <p className={`text-sm font-black ${step.status !== 'upcoming' ? 'text-slate-900' : 'text-slate-300'}`}>{step.title}</p>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1.5">{step.time}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </motion.div>
-
-                            {/* Map Placeholder */}
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.6, delay: 0.4 }}
-                                className="bg-slate-100 rounded-[3rem] h-96 relative overflow-hidden flex items-center justify-center border border-slate-100 shadow-xl group"
-                            >
-                                <div className="absolute inset-0 bg-[#f8f6f6] flex items-center justify-center overflow-hidden">
-                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#C41C1C 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
-                                    <div className="text-center relative z-10">
-                                        <Navigation className="text-[#C41C1C] mx-auto mb-6 animate-bounce" size={48} />
-                                        <p className="text-slate-900 font-black text-xl tracking-tight">{t('tracking.map.connecting')}</p>
-                                        <p className="text-slate-500 text-sm mt-2 font-bold">{t('tracking.map.donorAway', { name: 'Ahmed R.', distance: '1.2km' })}</p>
+                                {/* Status 3: Active (Pulsing) */}
+                                <div className="flex flex-col items-center">
+                                    <div className="w-10 h-10 rounded-full bg-white border-2 border-[#C41C1C] text-[#C41C1C] flex items-center justify-center mb-3 shadow-[0_0_15px_rgba(196,28,28,0.3)] relative">
+                                        <Bell size={18} className="animate-pulse" />
+                                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-[#C41C1C] rounded-full border-2 border-white"></span>
                                     </div>
+                                    <span className="text-[10px] font-black text-[#C41C1C] uppercase tracking-widest mb-1">Active</span>
+                                    <span className="text-sm font-bold text-slate-800 text-center">Donor Notified</span>
                                 </div>
-                                <div className="absolute bottom-8 left-8 right-8 bg-white/90 backdrop-blur-2xl p-6 rounded-[2rem] flex items-center justify-between border border-white shadow-2xl transition-all hover:scale-[1.02]">
-                                    <div className="flex items-center gap-5">
-                                        <div className="w-14 h-14 bg-[#C41C1C] rounded-2xl flex items-center justify-center text-white shadow-xl shadow-red-200">
-                                            <Navigation size={28} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('tracking.map.etaLabel')}</p>
-                                            <p className="text-slate-900 font-black text-2xl tracking-tighter">{t('tracking.map.etaValue', { count: 8 })}</p>
-                                        </div>
+
+                                {/* Status 4: Pending */}
+                                <div className="flex flex-col items-center opacity-40">
+                                    <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+                                        <User size={20} />
                                     </div>
-                                    <button className="rounded-full bg-white border-2 border-slate-200 px-10 py-4 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 shadow-xl shadow-slate-200">{t('tracking.map.fullMap')}</button>
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pending</span>
+                                    <span className="text-sm font-bold text-slate-600 text-center">Donor Accepted</span>
                                 </div>
-                            </motion.div>
-                        </div>
 
-                        {/* Right Column: Activity Log & Matches */}
-                        <div className="lg:col-span-4 space-y-10">
-
-                            {/* Activity Log */}
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.6, delay: 0.3 }}
-                                className="bg-white rounded-[3rem] p-8 shadow-sm h-fit border border-slate-50"
-                            >
-                                <div className="flex items-center justify-between mb-8 px-2">
-                                    <h3 className="font-black text-slate-900 text-lg tracking-tight">{t('tracking.activity.title')}</h3>
-                                    <button className="p-2 hover:bg-slate-50 rounded-xl transition-colors"><MoreHorizontal size={20} className="text-slate-300" /></button>
+                                {/* Status 5: Pending */}
+                                <div className="flex flex-col items-center opacity-40">
+                                    <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+                                        <CheckCircle2 size={20} />
+                                    </div>
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pending</span>
+                                    <span className="text-sm font-bold text-slate-600 text-center">Fulfilled</span>
                                 </div>
-                                <div className="space-y-6">
-                                    {activityLog.map(item => (
-                                        <div key={item.id} className="flex gap-5 group px-2">
-                                            <div className={`w-12 h-12 ${item.color} rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm`}>
-                                                {item.icon}
-                                            </div>
-                                            <div className="border-b border-slate-50 pb-5 flex-1">
-                                                <p className="text-sm font-black text-slate-800 mb-1">{item.action}</p>
-                                                <p className="text-[10px] font-bold text-slate-400 flex items-center gap-2">
-                                                    <Clock size={12} /> {item.time}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <button className="w-full mt-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-[#C41C1C] transition-all hover:bg-red-50 rounded-2xl">{t('tracking.activity.viewAll')}</button>
-                            </motion.div>
+                            </div>
+                        </motion.div>
 
-                            {/* Potential Matches */}
-                            <div className="space-y-5">
-                                <h3 className="font-black text-slate-900 px-6 flex items-center justify-between tracking-tight text-lg">
-                                    {t('tracking.matches.title')}
-                                    <span className="text-[10px] bg-[#C41C1C]/5 text-[#C41C1C] px-3 py-1 rounded-lg tracking-widest italic font-bold border border-red-50">{t('tracking.matches.nearby')}</span>
-                                </h3>
-                                {matches.map((match, i) => (
+                        {/* Potential Matches */}
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-slate-800">Potential Matches ({matches.length})</h3>
+                                <span className="text-xs font-semibold text-slate-500">Showing donors within 5km</span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {matches.map((match) => (
                                     <motion.div
                                         key={match.id}
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ duration: 0.5, delay: 0.5 + (i * 0.1) }}
-                                        className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all group hover:-translate-y-2"
+                                        initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                                        className={`bg-white rounded-3xl p-5 border shadow-sm flex flex-col h-full relative overflow-hidden transition-all ${match.status === 'ACCEPTED' ? 'border-emerald-200 shadow-emerald-50/50' : 'border-slate-200 opacity-80'}`}
                                     >
-                                        <div className="flex justify-between items-start mb-8">
-                                            <div className="flex items-center gap-5">
-                                                <Image
-                                                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${match.name}`}
-                                                    width={52}
-                                                    height={52}
-                                                    className="w-13 h-13 rounded-2xl bg-slate-50 border border-slate-100 shadow-sm"
-                                                    alt={match.name}
-                                                />
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 border-2 border-white shadow-sm">
+                                                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${match.avatar}`} alt={match.name} className="w-full h-full object-cover" />
+                                                </div>
                                                 <div>
-                                                    <p className="text-slate-900 font-black text-base">{match.name}</p>
-                                                    <p className="text-[10px] font-black text-slate-400 uppercase flex items-center gap-2 mt-1">
-                                                        <MapPin size={12} className="text-[#C41C1C]" /> {match.distance}
-                                                    </p>
+                                                    <h4 className="font-bold text-slate-900 text-lg flex items-center gap-1.5">
+                                                        {match.name}
+                                                        {match.isVerified && <CheckCircle2 size={14} className="text-blue-500" />}
+                                                        {match.isElite && <Droplets size={14} className="text-[#C41C1C]" />}
+                                                    </h4>
+                                                    <p className="text-xs font-medium text-slate-500">{match.distance} away • {match.isVerified ? 'Verified Donor' : 'Elite Donor'}</p>
                                                 </div>
                                             </div>
-                                            <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${match.id === 1 ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
-                                                {match.eta}
+                                            <span className={`px-2 py-1 rounded text-[9px] font-black tracking-widest uppercase 
+                                                ${match.status === 'ACCEPTED' ? 'bg-emerald-50 text-emerald-600' :
+                                                    match.status === 'PENDING_APPROVAL' ? 'bg-amber-50 text-amber-600' :
+                                                        'bg-blue-50 text-blue-600'}`}>
+                                                {match.status.replace('_', ' ')}
                                             </span>
                                         </div>
-                                        <div className="flex gap-4">
-                                            <button className="rounded-full bg-[#C41C1C] px-10 py-4 text-sm font-bold text-white shadow-xl shadow-red-200 transition-all hover:bg-[#A01717] hover:-translate-y-1 flex-1 flex items-center justify-center gap-3">
-                                                <Phone size={16} /> {t('tracking.matches.call')}
-                                            </button>
-                                            <button className="bg-slate-50 text-slate-400 w-14 h-14 rounded-2xl flex items-center justify-center hover:bg-red-50 hover:text-[#C41C1C] transition-all border border-slate-100 active:scale-90 shadow-sm">
-                                                <AlertCircle size={22} />
-                                            </button>
+
+                                        <div className="mt-auto space-y-3">
+                                            {match.status === 'ACCEPTED' && (
+                                                <>
+                                                    <div className="bg-emerald-50 p-3 rounded-xl flex items-center justify-between border border-emerald-100 mb-2">
+                                                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-widest">Contact</span>
+                                                        <span className="text-emerald-700 font-bold tracking-wider">{match.phone}</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleCall(match.name)}
+                                                        className="w-full rounded-full bg-[#C41C1C] px-6 py-3.5 text-sm font-bold text-white shadow-md shadow-red-200 transition-all hover:bg-[#A01717] hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                                                    >
+                                                        <Phone size={16} />
+                                                        Call Securely
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleViewLocation(match.name)}
+                                                        className="w-full rounded-full bg-white px-6 py-3 text-sm font-bold text-[#C41C1C] border border-transparent hover:border-red-100 transition-all flex items-center justify-center gap-2"
+                                                    >
+                                                        <Map size={16} />
+                                                        View Location
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            {match.status === 'PENDING_APPROVAL' && (
+                                                <div className="bg-slate-50 p-4 text-center border border-slate-200 border-dashed rounded-2xl flex flex-col gap-3 relative mt-2">
+                                                    <div className="flex justify-between items-center text-sm px-2">
+                                                        <span className="font-bold text-slate-500">Phone:</span>
+                                                        <span className="font-medium text-slate-400 tracking-wider font-mono">+92 3XX XXXXXXX</span>
+                                                    </div>
+                                                    <div className="w-full h-px bg-slate-200 my-1"></div>
+                                                    <p className="text-xs font-bold text-amber-600 mb-2">Waiting for donor approval...</p>
+
+                                                    {/* Demo purposes button */}
+                                                    <button
+                                                        onClick={() => handleDonorApprove(match.id)}
+                                                        className="text-[10px] w-full uppercase tracking-widest border border-slate-300 text-slate-500 font-bold py-2 px-2 rounded-xl transition-all hover:bg-slate-200 hover:text-slate-800"
+                                                    >
+                                                        Simulate Donor Approve
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {match.status === 'OPEN' && (
+                                                <button
+                                                    onClick={() => handleRequestConnection(match.id)}
+                                                    className="w-full rounded-full bg-slate-900 px-6 py-3.5 mt-2 text-sm font-bold text-white shadow-md shadow-slate-200 transition-all hover:bg-slate-800 hover:-translate-y-0.5"
+                                                >
+                                                    Request Connection
+                                                </button>
+                                            )}
                                         </div>
                                     </motion.div>
                                 ))}
                             </div>
                         </div>
-                    </div>
-                </main>
-            </div>
 
-            <Footer />
+                        {/* Map Placeholder */}
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+                            className="w-full h-64 bg-[#7CA99E] rounded-3xl relative overflow-hidden border border-slate-200 shadow-sm flex items-end justify-center pb-6"
+                        >
+                            {/* Fake Map Pattern (CSS) */}
+                            <div className="absolute inset-0 opacity-20" style={{
+                                backgroundImage: `radial-gradient(circle at center, transparent 0, transparent 2px, #fff 3px, #fff 4px), radial-gradient(circle at center, transparent 0, transparent 2px, #fff 3px, #fff 4px)`,
+                                backgroundSize: '40px 40px', backgroundPosition: '0 0, 20px 20px'
+                            }}></div>
+
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-16 h-16 bg-[#C41C1C]/20 rounded-full animate-ping absolute"></div>
+                                <div className="w-8 h-8 bg-[#C41C1C] rounded-full border-4 border-white shadow-lg relative z-10"></div>
+                            </div>
+
+                            {/* Floating Pill */}
+                            <div className="relative z-10 bg-white rounded-full px-6 py-3 shadow-lg flex items-center gap-3">
+                                <span className="w-3 h-3 rounded-full bg-[#C41C1C] animate-pulse"></span>
+                                <span className="text-sm font-bold text-slate-800">{matches.filter(m => m.status === 'ACCEPTED').length} active donors attached</span>
+                            </div>
+                        </motion.div>
+
+                    </div>
+                </div>
+            </main>
         </div>
     );
 }

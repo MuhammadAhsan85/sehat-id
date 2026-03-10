@@ -1,50 +1,65 @@
-// middleware.ts — Handles both i18n locale routing AND auth protection
-// next-intl createMiddleware runs first, then auth checks layer on top
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-import createMiddleware from "next-intl/middleware";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { routing } from "@/i18n/routing";
-import { PROTECTED_ROUTES, AUTH_ROUTES, ROUTES } from "@/constants/routes";
-
-// Create the next-intl middleware (handles locale detection + cookie persistence)
-const intlMiddleware = createMiddleware(routing);
+// Add locales here to match the routing setup (e.g. en, ur)
+const locales = ['en', 'ur'];
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
-    // ── Strip locale prefix for auth checks (e.g. /ur/dashboard → /dashboard) ──
-    const cleanPath = pathname.replace(/^\/(en|ur|ar)/, "") || "/";
-
-    // Check session cookie set by the API server on login
-    const sessionCookie = request.cookies.get("sehatid_session");
-    const isAuthenticated = Boolean(sessionCookie?.value);
-
-    // ── Protect private routes ────────────────────────────────────────────────
-    const isProtected = PROTECTED_ROUTES.some((route) => cleanPath.startsWith(route));
-    if (isProtected && !isAuthenticated) {
-        // Preserve the locale prefix from the incoming URL (e.g. "/ur") so that
-        // next-intl doesn't add a second prefix and cause a redirect loop.
-        const localeMatch = pathname.match(/^\/(en|ur|ar|zh)(?=\/|$)/);
-        const localePrefix = localeMatch ? localeMatch[0] : "";
-        const loginUrl = new URL(localePrefix + ROUTES.LOGIN, request.url);
-        loginUrl.searchParams.set("redirect", cleanPath);
-        return NextResponse.redirect(loginUrl);
+    // Redirect root to default locale to prevent 404 DefaultLayout hydration errors
+    if (pathname === '/') {
+        return NextResponse.redirect(new URL(`/${locales[0]}`, request.url));
     }
 
-    // ── Redirect authenticated users away from login/register ─────────────────
-    const isAuthRoute = AUTH_ROUTES.some((route) => cleanPath === route);
-    if (isAuthRoute && isAuthenticated) {
-        return NextResponse.redirect(new URL(ROUTES.DASHBOARD, request.url));
+    // Check if the current route is one of the protected routes (ignoring locale prefix)
+    const isProtectedRoute = locales.some(locale =>
+        pathname.startsWith(`/${locale}/dashboard`) ||
+        pathname.startsWith(`/${locale}/admin`) ||
+        pathname.startsWith(`/${locale}/requests`)
+    ) || pathname.startsWith('/dashboard') || pathname.startsWith('/admin') || pathname.startsWith('/requests');
+
+    if (isProtectedRoute) {
+        // [TEMPORARY DEBUGGING] Bypass auth guards to verify i18n routing UI
+        // return NextResponse.next(); // Uncomment to bypass
+
+        // Read the cookies set by auth.store.ts
+        const hasSession = request.cookies.has('sehatid_session');
+        const isVerified = request.cookies.get('sehatid_verified')?.value === 'true';
+
+        // 1. If not logged in at all -> redirect to login
+        if (!hasSession) {
+            // Find the active locale
+            const activeLocale = locales.find(locale => pathname.startsWith(`/${locale}/`)) || 'en';
+            const loginUrl = new URL(`/${activeLocale}/login`, request.url);
+            // Optionally append a redirect parameter
+            loginUrl.searchParams.set('redirect', pathname);
+            return NextResponse.redirect(loginUrl);
+        }
+
+        // 2. If logged in but NOT verified -> redirect to /verify
+        if (!isVerified) {
+            // Prevent infinite loops if they are already on /verify, but /verify isn't in protected routes
+            const activeLocale = locales.find(locale => pathname.startsWith(`/${locale}/`)) || 'en';
+            if (!pathname.includes('/verify')) {
+                return NextResponse.redirect(new URL(`/${activeLocale}/verify`, request.url));
+            }
+        }
     }
 
-    // ── Let next-intl handle locale routing ───────────────────────────────────
-    return intlMiddleware(request);
+    return NextResponse.next();
 }
 
+// See "Matching Paths" below to learn more
 export const config = {
-    // Match all except Next.js internals, static assets, and API routes
     matcher: [
-        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/).*)",
+        /*
+         * Match all request paths except for the ones starting with:
+         * - api (API routes)
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         */
+        '/((?!api|_next/static|_next/image|favicon.ico).*)',
     ],
 };

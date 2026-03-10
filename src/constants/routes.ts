@@ -14,6 +14,10 @@ export const ROUTES = {
     DASHBOARD: "/dashboard",
     PROFILE: "/profile",
     ADMIN: "/admin",
+    FEATURES: "/features",
+    REQUESTS: "/requests",
+    TRUST_SAFETY: "/trust-safety",
+    AI_ASSISTANT: "/ai-assistant",
     // Footer / supplemental routes
     BLOOD_BANKS: "/blood-banks",
     EMERGENCY: "/find-donors",   // Alias — redirects to find-donors for now

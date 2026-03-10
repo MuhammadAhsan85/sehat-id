@@ -37,8 +37,8 @@
 
 html {
   scroll-behavior: smooth;
-  /* Prevent horizontal overflow at any viewport */
-  overflow-x: hidden;
+  /* Prevent horizontal overflow while allowing sticky children */
+  overflow-x: clip;
 }
 
 body {
@@ -47,7 +47,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* ─── Focus Utility ──────────────────────────────────────────────────────── */

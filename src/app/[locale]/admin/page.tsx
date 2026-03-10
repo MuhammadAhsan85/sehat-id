@@ -3,11 +3,9 @@
  * Route: /admin
  *
  * Features:
- *  - Sticky admin navbar with search, notifications, profile
- *  - 4 stat cards (total donors, available donors, requests, emergencies)
- *  - Recharts AreaChart for weekly donor registrations
- *  - Recent Contact Reveals table
- *  - Right sidebar: Requests by Blood Group, Trust Score, Privacy Compliance
+ *  - Refactored strictly to Sehat-ID brand guidelines (white/gray-50/brand red)
+ *  - Fully responsive tables and grid layouts
+ *  - Clean Tailwind utility classes for modern aesthetics
  */
 
 "use client";
@@ -15,13 +13,13 @@
 import React, { useState } from "react";
 import {
     Search, Bell, User, Download, Users, UserCheck,
-    FileText, AlertCircle, Shield, Lock, ChevronDown,
+    FileText, AlertTriangle, Shield, Lock, ChevronDown,
+    ArrowUpRight, ArrowDownRight, MapPin, Clock
 } from "lucide-react";
 import {
     AreaChart, Area, XAxis, Tooltip, ResponsiveContainer,
 } from "recharts";
-import Link from "next/link";
-import Footer from "@/shared/components/Footer";
+import { Link } from "@/i18n/navigation";
 import { ROUTES } from "@/constants/routes";
 import Logo from "@/shared/components/Logo";
 
@@ -37,11 +35,13 @@ const chartData = [
     { name: "SUN", registrations: 310 },
 ];
 
-const recentReveals = [
-    { id: 1, revealer: "Hospital Gen. Lahore", donor: "Ahmed Khan", group: "O+", location: "Gulberg III, LHR", time: "2 mins ago" },
-    { id: 2, revealer: "Zainab S.", donor: "Fatima Ali", group: "B-", location: "Saddar, KHI", time: "14 mins ago" },
-    { id: 3, revealer: "Edhi Foundation", donor: "Bilal Mansoor", group: "A+", location: "I-8, ISL", time: "45 mins ago" },
-    { id: 4, revealer: "Shaukat Khanum", donor: "Sana Javed", group: "AB+", location: "DHA Ph 5, LHR", time: "1 hour ago" },
+const initialReveals = [
+    { id: 1, revealer: "Hospital Gen. Lahore", donor: "Ahmed Khan", group: "O+", location: "Gulberg III, LHR", status: "Active", time: "2 mins ago" },
+    { id: 2, revealer: "Zainab S.", donor: "Fatima Ali", group: "B-", location: "Saddar, KHI", status: "Active", time: "14 mins ago" },
+    { id: 3, revealer: "Edhi Foundation", donor: "Bilal Mansoor", group: "A+", location: "I-8, ISL", status: "Pending", time: "45 mins ago" },
+    { id: 4, revealer: "Shaukat Khanum", donor: "Sana Javed", group: "AB+", location: "DHA Ph 5, LHR", status: "Urgent", time: "1 hour ago" },
+    { id: 5, revealer: "Agha Khan Hosp", donor: "Usman Tariq", group: "O-", location: "Clifton, KHI", status: "Pending", time: "2 hours ago" },
+    { id: 6, revealer: "Jinnah Hospital", donor: "Ayesha Malik", group: "A-", location: "Model Town, LHR", status: "Active", time: "3 hours ago" },
 ];
 
 const groupStats = [
@@ -58,26 +58,48 @@ interface StatCardProps {
     label: string;
     value: string;
     trend: string;
-    trendColor: string;
-    accent?: string;  // border + accent color class
-    highlight?: boolean;
+    isPositive?: boolean | null;
+    accentHighlight?: boolean;
 }
 
-function StatCard({ icon, label, value, trend, trendColor, accent = "border-gray-100", highlight = false }: StatCardProps) {
+function StatCard({ icon, label, value, trend, isPositive = null, accentHighlight = false }: StatCardProps) {
     return (
-        <div className={`bg-white p-6 rounded-2xl border shadow-sm flex flex-col justify-between h-32 relative overflow-hidden ${accent}`}>
-            {highlight && (
-                <div className="absolute top-0 right-0 w-16 h-16 rounded-bl-full opacity-40"
-                    style={{ background: trendColor === "text-green-500" ? "#d1fae5" : "#fee2e2" }} />
+        <div className={`bg-white p-6 rounded-2xl border shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] transition-all hover:shadow-md flex flex-col justify-between h-[136px] relative overflow-hidden ${accentHighlight ? 'border-red-100 ring-1 ring-red-50' : 'border-gray-100'}`}>
+
+            {/* Background Glow for Accents */}
+            {accentHighlight && (
+                <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
             )}
-            <div className={`flex items-center gap-2 text-sm font-medium relative z-10 ${highlight ? "font-bold" : ""} ${trendColor === "text-green-500" && highlight ? "text-green-600" : trendColor === "text-[#C41C1C]" && highlight ? "text-[#C41C1C]" : "text-gray-500"}`}>
-                {icon} {label}
+
+            <div className={`flex items-center gap-2 text-sm font-bold relative z-10 ${accentHighlight ? "text-[#C41C1C]" : "text-gray-500"}`}>
+                {icon}
+                <span>{label}</span>
             </div>
+
             <div className="relative z-10">
-                <h3 className="text-3xl font-black text-gray-900">{value}</h3>
-                <p className={`text-xs font-bold mt-1 ${trendColor}`}>{trend}</p>
+                <h3 className="text-3xl font-black text-gray-900 tracking-tight">{value}</h3>
+
+                <div className="mt-1 flex items-center gap-1.5 text-xs font-bold">
+                    {isPositive === true && <span className="text-emerald-500 flex items-center bg-emerald-50 px-1.5 py-0.5 rounded"><ArrowUpRight size={12} className="mr-0.5" /> {trend}</span>}
+                    {isPositive === false && <span className="text-red-500 flex items-center bg-red-50 px-1.5 py-0.5 rounded"><ArrowDownRight size={12} className="mr-0.5" /> {trend}</span>}
+                    {isPositive === null && <span className="text-[#C41C1C] flex items-center"><AlertTriangle size={12} className="mr-1" /> {trend}</span>}
+                </div>
             </div>
         </div>
+    );
+}
+
+// ── Status Badge ──────────────────────────────────────────────────────────────
+function StatusBadge({ status }: { status: string }) {
+    let styles = "bg-gray-50 text-gray-600 ring-gray-200";
+    if (status === "Active" || status === "Approved") styles = "bg-emerald-50 text-emerald-700 ring-emerald-200/50";
+    if (status === "Pending") styles = "bg-amber-50 text-amber-700 ring-amber-200/50";
+    if (status === "Urgent" || status === "Rejected") styles = "bg-red-50 text-red-700 ring-red-200/50";
+
+    return (
+        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ring-1 ${styles}`}>
+            {status}
+        </span>
     );
 }
 
@@ -85,107 +107,82 @@ function StatCard({ icon, label, value, trend, trendColor, accent = "border-gray
 
 export default function AdminDashboardPage() {
     const [searchQuery, setSearchQuery] = useState("");
+    const [reveals, setReveals] = useState(initialReveals);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 4;
+
+    const handleApprove = (id: number) => {
+        setReveals(prev => prev.map(r => r.id === id ? { ...r, status: "Approved" } : r));
+    };
+
+    const handleReject = (id: number) => {
+        setReveals(prev => prev.map(r => r.id === id ? { ...r, status: "Rejected" } : r));
+    };
+
+    const handleDelete = (id: number) => {
+        setReveals(prev => prev.filter(r => r.id !== id));
+    };
+
+    const filteredReveals = reveals.filter(r =>
+        r.revealer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.donor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const paginatedReveals = filteredReveals.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const totalPages = Math.ceil(filteredReveals.length / itemsPerPage);
 
     return (
-        <div className="min-h-screen bg-[#f8f6f6] text-gray-900 pb-20">
+        <div className="min-h-screen bg-gray-50 text-gray-900 font-sans selection:bg-red-100 selection:text-red-900">
 
-            {/* ── Admin Navbar ── */}
-            <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
-                <div className="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-8">
-                        {/* Logo */}
-                        <div className="flex items-center gap-3">
-                            <Logo />
-                            <span className="text-gray-400 font-medium text-lg pt-0.5 hidden sm:block">Admin</span>
-                        </div>
 
-                        {/* Search */}
-                        <div className="hidden md:flex items-center bg-red-50/50 rounded-full px-4 py-2 border border-red-100 w-80">
-                            <Search size={16} className="text-red-300 shrink-0" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search donors or requests"
-                                aria-label="Search"
-                                className="bg-transparent border-none outline-none ml-2 text-sm w-full placeholder-red-300 text-gray-700"
-                            />
-                        </div>
-                    </div>
+            <main className="max-w-[1440px] mx-auto px-4 sm:px-6 py-20">
 
-                    <div className="flex items-center gap-6">
-                        {/* Nav tabs */}
-                        <nav className="hidden lg:flex gap-6 text-sm font-medium">
-                            {[
-                                { label: "Dashboard", active: true },
-                                { label: "Donors", active: false },
-                                { label: "Requests", active: false },
-                                { label: "Emergencies", active: false },
-                            ].map(({ label, active }) => (
-                                <button
-                                    key={label}
-                                    type="button"
-                                    className={`py-5 border-b-2 transition-colors ${active ? "text-[#C41C1C] border-[#C41C1C]" : "text-gray-500 border-transparent hover:text-gray-900"}`}
-                                >
-                                    {label}
-                                </button>
-                            ))}
-                        </nav>
-
-                        {/* Icon buttons */}
-                        <div className="flex items-center gap-2">
-                            <button aria-label="Notifications" className="w-10 h-10 rounded-full bg-red-50 text-[#C41C1C] flex items-center justify-center hover:bg-red-100 transition">
-                                <Bell size={18} />
-                            </button>
-                            <button aria-label="Profile" className="w-10 h-10 rounded-full bg-red-50 text-[#C41C1C] flex items-center justify-center hover:bg-red-100 transition">
-                                <User size={18} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <main className="max-w-[1440px] mx-auto px-6 pt-8">
-
-                {/* ── Page header ── */}
+                {/* ── Page Header ── */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                     <div>
-                        <h1 className="text-3xl font-black text-gray-900">Admin Analytics</h1>
-                        <p className="text-sm text-gray-400 mt-1">Last updated: Mar 5, 2026, 04:30 AM</p>
+                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">Main Dashboard</h1>
+                        <p className="text-sm font-medium text-gray-500 mt-1 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Live System Status • Last updated just now
+                        </p>
                     </div>
-                    <button className="flex items-center gap-2 bg-[#C41C1C] text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:bg-red-700 transition">
-                        <Download size={16} /> Export CSV
+                    <button className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-6 py-2.5 rounded-full font-bold text-sm shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        <Download size={16} className="text-gray-400" /> Export Report
                     </button>
                 </div>
 
-                {/* ── Stat cards ── */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <StatCard icon={<Users size={16} />} label="Total Donors" value="12,450" trend="↑ +12% this month" trendColor="text-green-500" accent="border-gray-100" />
-                    <StatCard icon={<UserCheck size={16} />} label="Available Donors" value="8,120" trend="↑ +5.2% this month" trendColor="text-green-500" accent="border-green-100" highlight />
-                    <StatCard icon={<FileText size={16} />} label="Total Requests" value="456" trend="↓ -2.1% this month" trendColor="text-red-400" accent="border-gray-100" />
-                    <StatCard icon={<AlertCircle size={16} />} label="Active Emergencies" value="12" trend="! Critical" trendColor="text-[#C41C1C]" accent="border-red-100" highlight />
+                {/* ── Key Metrics Grids ── */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                    <StatCard icon={<Users size={18} />} label="Total Registered Donors" value="12,450" trend="12%" isPositive={true} />
+                    <StatCard icon={<UserCheck size={18} />} label="Available Donors" value="8,120" trend="5.2%" isPositive={true} />
+                    <StatCard icon={<FileText size={18} />} label="Total Processed Requests" value="456" trend="2.1%" isPositive={false} />
+                    <StatCard icon={<AlertTriangle size={18} />} label="Active Critical Emergencies" value="12" trend="Requires Action" isPositive={null} accentHighlight={true} />
                 </div>
 
-                {/* ── Main grid ── */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* ── Main Operations Content ── */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pb-20">
 
-                    {/* Left column (8) */}
+                    {/* Left Column (Main Data) */}
                     <div className="lg:col-span-8 flex flex-col gap-6">
 
-                        {/* Chart */}
-                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                        {/* Registration Chart Area */}
+                        <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex flex-col">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-lg font-bold text-gray-900">Recent Donor Registrations</h3>
-                                <button className="flex items-center gap-1.5 text-xs font-bold text-[#C41C1C] bg-red-50 px-3 py-1.5 rounded-full hover:bg-red-100 transition">
-                                    This Week <ChevronDown size={12} />
+                                <div>
+                                    <h3 className="text-lg font-black text-gray-900">Platform Growth</h3>
+                                    <p className="text-xs font-medium text-gray-500">New donor registrations</p>
+                                </div>
+                                <button className="flex items-center gap-1.5 text-xs font-bold text-gray-600 bg-gray-50 border border-gray-200 px-4 py-2 rounded-full hover:bg-gray-100 transition-colors">
+                                    Last 7 Days <ChevronDown size={14} className="text-gray-400" />
                                 </button>
                             </div>
-                            <div className="h-64 w-full">
+                            <div className="h-[280px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorReg" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#C41C1C" stopOpacity={0.2} />
+                                                <stop offset="5%" stopColor="#C41C1C" stopOpacity={0.15} />
                                                 <stop offset="95%" stopColor="#C41C1C" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
@@ -198,11 +195,13 @@ export default function AdminDashboardPage() {
                                         />
                                         <Tooltip
                                             contentStyle={{
-                                                borderRadius: "12px",
-                                                border: "none",
-                                                boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
+                                                borderRadius: "16px",
+                                                border: "1px solid #f3f4f6",
+                                                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
                                                 fontSize: "12px",
+                                                fontWeight: "bold",
                                             }}
+                                            itemStyle={{ color: "#C41C1C", fontWeight: "900" }}
                                         />
                                         <Area
                                             type="monotone"
@@ -211,102 +210,155 @@ export default function AdminDashboardPage() {
                                             strokeWidth={3}
                                             fillOpacity={1}
                                             fill="url(#colorReg)"
+                                            activeDot={{ r: 6, strokeWidth: 0, fill: "#C41C1C" }}
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
 
-                        {/* Contact reveals table */}
-                        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-                            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                                <h3 className="text-lg font-bold text-gray-900">Recent Contact Reveals</h3>
-                                <span className="text-xs text-gray-400 font-medium">Last 10 reveals</span>
+                        {/* Recent Activity Table Container */}
+                        <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white">
+                                <div>
+                                    <h3 className="text-lg font-black text-gray-900">Recent Contact Reveals</h3>
+                                    <p className="text-xs font-medium text-gray-500">Live feed of hospital-to-donor connections</p>
+                                </div>
+                                <button className="text-sm font-bold text-[#C41C1C] hover:text-[#A01717] transition-colors">
+                                    View full log →
+                                </button>
                             </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left">
+
+                            {/* Responsive Horizontal Scroll Wrapper */}
+                            <div className="overflow-x-auto w-full">
+                                <table className="w-full text-left min-w-[900px]">
                                     <thead>
-                                        <tr className="text-[10px] text-gray-400 font-bold uppercase tracking-wider border-b border-gray-100">
-                                            <th className="px-6 py-4">Revealer</th>
-                                            <th className="px-6 py-4">Donor Name</th>
-                                            <th className="px-6 py-4">Group</th>
-                                            <th className="px-6 py-4">Location</th>
-                                            <th className="px-6 py-4 text-right">Time</th>
+                                        <tr className="bg-gray-50/50 border-b border-gray-100">
+                                            <th className="px-6 py-4 text-[10px] text-gray-400 font-extrabold uppercase tracking-widest">Medical Entity</th>
+                                            <th className="px-6 py-4 text-[10px] text-gray-400 font-extrabold uppercase tracking-widest">Donor Matched</th>
+                                            <th className="px-6 py-4 text-[10px] text-gray-400 font-extrabold uppercase tracking-widest">Type</th>
+                                            <th className="px-6 py-4 text-[10px] text-gray-400 font-extrabold uppercase tracking-widest">Status</th>
+                                            <th className="px-6 py-4 text-[10px] text-gray-400 font-extrabold uppercase tracking-widest">Timestamp</th>
+                                            <th className="px-6 py-4 text-[10px] text-gray-400 font-extrabold uppercase tracking-widest text-right">Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="text-sm">
-                                        {recentReveals.map((r) => (
-                                            <tr key={r.id} className="border-b border-gray-50 hover:bg-slate-50 transition">
-                                                <td className="px-6 py-4 font-bold text-gray-900">{r.revealer}</td>
-                                                <td className="px-6 py-4 text-gray-600">{r.donor}</td>
+                                    <tbody className="bg-white divide-y divide-gray-50 text-sm">
+                                        {paginatedReveals.map((r) => (
+                                            <tr key={r.id} className="hover:bg-gray-50/80 transition-colors group">
                                                 <td className="px-6 py-4">
-                                                    <span className="bg-red-50 text-[#C41C1C] font-black px-2 py-1 rounded text-xs">
+                                                    <p className="font-bold text-gray-900">{r.revealer}</p>
+                                                    <p className="text-xs text-gray-500 font-medium flex items-center gap-1 mt-0.5"><MapPin size={10} /> {r.location}</p>
+                                                </td>
+                                                <td className="px-6 py-4 font-bold text-gray-700">{r.donor}</td>
+                                                <td className="px-6 py-4">
+                                                    <span className="bg-red-50 text-[#C41C1C] border border-red-100 font-black px-2 py-1 rounded text-xs select-none">
                                                         {r.group}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-500 text-xs">{r.location}</td>
-                                                <td className="px-6 py-4 text-right text-gray-400 text-xs">{r.time}</td>
+                                                <td className="px-6 py-4">
+                                                    <StatusBadge status={r.status} />
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-xs font-semibold text-gray-500 flex items-center justify-start gap-1"><Clock size={12} /> {r.time}</span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {r.status === 'Pending' && (
+                                                            <>
+                                                                <button onClick={() => handleApprove(r.id)} className="text-xs font-bold bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-md hover:bg-emerald-100 transition-colors">Approve</button>
+                                                                <button onClick={() => handleReject(r.id)} className="text-xs font-bold bg-red-50 text-red-600 px-3 py-1.5 rounded-md hover:bg-red-100 transition-colors">Reject</button>
+                                                            </>
+                                                        )}
+                                                        <button onClick={() => handleDelete(r.id)} className="text-xs font-bold bg-gray-100 text-gray-500 px-3 py-1.5 rounded-md hover:bg-red-50 hover:text-red-600 transition-colors">Delete</button>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         ))}
+                                        {paginatedReveals.length === 0 && (
+                                            <tr>
+                                                <td colSpan={6} className="px-6 py-12 text-center text-gray-500 font-medium text-sm">No recent reveals found matching search.</td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="p-4 bg-gray-50/50 border-t border-gray-100">
-                                <Link href={ROUTES.ADMIN} className="text-sm font-bold text-[#C41C1C] hover:underline px-2">
-                                    View all activities →
-                                </Link>
-                            </div>
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="p-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                    <button
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                        className="text-xs font-bold text-gray-600 bg-white border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                    >
+                                        Previous
+                                    </button>
+                                    <span className="text-xs font-bold text-gray-500">Page {currentPage} of {totalPages}</span>
+                                    <button
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                        className="text-xs font-bold text-gray-600 bg-white border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Right column (4) */}
+                    {/* Right Column (Insights & Meta) */}
                     <div className="lg:col-span-4 flex flex-col gap-6">
 
-                        {/* Blood group breakdown */}
-                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                            <h3 className="text-lg font-bold text-gray-900 mb-6">Requests by Group</h3>
-                            <div className="space-y-5">
+                        {/* Blood Group Demographics */}
+                        <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                            <h3 className="text-lg font-black text-gray-900 mb-6">Inventory Demand</h3>
+                            <div className="space-y-6">
                                 {groupStats.map(({ group, percentage }) => (
                                     <div key={group}>
-                                        <div className="flex justify-between text-xs font-bold text-gray-900 mb-2">
+                                        <div className="flex justify-between text-xs font-bold text-gray-700 mb-2">
                                             <span>{group}</span>
-                                            <span className="text-[#C41C1C]">{percentage}%</span>
+                                            <span className="text-[#C41C1C] font-black">{percentage}%</span>
                                         </div>
-                                        <div className="w-full bg-red-50 h-2 rounded-full overflow-hidden">
-                                            <div className="bg-[#C41C1C] h-full rounded-full transition-all" style={{ width: `${percentage}%` }} />
+                                        <div className="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                                            <div className="bg-[#C41C1C] h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${percentage}%` }} />
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                        {/* Trust Score */}
-                        <div className="bg-[#C41C1C] p-6 rounded-3xl shadow-lg shadow-red-200 text-white relative overflow-hidden">
-                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-red-700 rounded-full opacity-50" />
-                            <div className="flex items-center gap-2 mb-4 relative z-10">
-                                <div className="p-1.5 bg-white/20 rounded-lg">
-                                    <Shield size={20} />
-                                </div>
-                                <h3 className="font-bold">Trust Score</h3>
+                        {/* System Trust & Health Score */}
+                        <div className="bg-gradient-to-br from-[#1E293B] to-[#0F172A] p-8 rounded-3xl shadow-xl shadow-slate-900/10 text-white relative overflow-hidden flex flex-col justify-center min-h-[220px]">
+                            {/* Abstract Graphic */}
+                            <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-bl-full pointer-events-none" />
+                            <div className="absolute -right-8 -bottom-8 w-40 h-40 bg-red-500/20 rounded-full blur-3xl pointer-events-none" />
+
+                            <div className="flex items-center gap-2 mb-3 relative z-10">
+                                <Shield className="text-emerald-400" size={20} />
+                                <h3 className="font-bold text-slate-300 text-sm tracking-wide uppercase">System Trust Score</h3>
                             </div>
-                            <p className="text-red-100 text-sm leading-relaxed mb-6 relative z-10 pr-4">
-                                System-wide donor verification status is currently at peak efficiency.
+                            <div className="flex justify-between items-end relative z-10 mb-4">
+                                <h2 className="text-6xl font-black text-white tracking-tighter">98.4<span className="text-3xl text-slate-400">%</span></h2>
+                            </div>
+                            <p className="text-slate-400 text-xs font-medium leading-relaxed relative z-10">
+                                Verification servers operating nominally. Identity fraud detection at peak efficiency.
                             </p>
-                            <div className="flex justify-between items-end relative z-10">
-                                <h2 className="text-4xl font-black">98.4%</h2>
-                                <Shield size={32} className="text-red-400 opacity-50" />
-                            </div>
                         </div>
 
-                        {/* Privacy Compliance */}
-                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                            <h3 className="text-lg font-bold text-gray-900 mb-4">Privacy Compliance</h3>
-                            <div className="bg-[#F0FDF4] border border-[#DCFCE7] rounded-2xl p-4 flex items-start gap-3">
-                                <Lock size={18} className="text-green-600 mt-0.5 shrink-0" />
+                        {/* Compliance Card */}
+                        <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-black text-gray-900">Compliance Sync</h3>
+                                <Lock size={16} className="text-gray-400" />
+                            </div>
+                            <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 flex gap-3">
+                                <div className="mt-0.5 bg-emerald-100 p-1.5 rounded-full shrink-0">
+                                    <Shield size={14} className="text-emerald-600" />
+                                </div>
                                 <div>
-                                    <h4 className="font-bold text-green-700 text-sm">All data encrypted</h4>
-                                    <p className="text-[10px] text-green-600 mt-0.5 uppercase tracking-wide font-semibold">
-                                        GDPR &amp; Local Health Privacy Compliant
+                                    <h4 className="font-extrabold text-emerald-900 text-sm">End-to-End Encrypted</h4>
+                                    <p className="text-[10px] text-emerald-600 mt-1 uppercase tracking-wider font-bold">
+                                        Data meets PK Health Standards
                                     </p>
                                 </div>
                             </div>
@@ -314,8 +366,6 @@ export default function AdminDashboardPage() {
                     </div>
                 </div>
             </main>
-
-            <Footer />
         </div>
     );
 }

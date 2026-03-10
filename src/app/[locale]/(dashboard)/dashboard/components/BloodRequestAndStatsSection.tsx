@@ -1,5 +1,5 @@
 // BloodRequestAndStatsSection — dashboard footer (responsive 4-col layout)
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { ROUTES } from "@/constants/routes";
 
 const PLATFORM_LINKS = [
@@ -21,7 +21,7 @@ const LEGAL_LINKS = [
 export function BloodRequestAndStatsSection() {
     return (
         <footer className="w-full border-t border-[#C41C1C1a] bg-white" aria-label="Site footer">
-            <div className="mx-auto max-w-7xl px-4 pt-16 pb-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl px-4 pt-12 pb-8 sm:px-6 lg:px-8">
 
                 <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
 

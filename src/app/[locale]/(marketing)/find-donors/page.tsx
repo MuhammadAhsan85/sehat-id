@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
 import { DonorSearch } from "./components/DonorSearch";
 
 export const metadata: Metadata = {
@@ -11,9 +9,7 @@ export const metadata: Metadata = {
 export default function FindDonorsPage() {
     return (
         <>
-            <Navbar />
             <DonorSearch />
-            <Footer />
         </>
     );
 }

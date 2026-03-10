@@ -10,11 +10,26 @@ export interface User {
     id: string;
     name: string;
     email: string;
+    phone?: string;
     role: UserRole;
+    /** Current step in the registration/onboarding flow (1-3) */
+    registrationStep: number;
+    /** Whether the user's identity/phone has been verified via OTP. */
+    isVerified: boolean;
+    /** Whether the user's profile is fully complete (CNIC, Blood Group, etc.) */
+    isProfileComplete: boolean;
     /** ISO-8601 date string */
     createdAt: string;
-    /** Whether the user's identity has been verified by an admin. */
-    isVerified: boolean;
+
+    // Optional details collected during registration
+    bloodGroup?: string;
+    lastDonationDate?: string;
+    lastDonatedAt?: string | null;
+    city?: string;
+    area?: string;
+    weight?: string;
+    /** Whether the donor is currently open for blood requests. */
+    isAvailable?: boolean;
 }
 
 /** JWT token pair returned after successful authentication. */

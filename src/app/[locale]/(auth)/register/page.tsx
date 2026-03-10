@@ -1,60 +1,23 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
-import Toast from "@/shared/components/ui/Toast";
+import { motion, AnimatePresence } from "framer-motion";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/hooks/useAuth";
 import authService from "@/services/auth.service";
-import type { UserRole } from "@/types/user";
+import { toast } from "sonner";
 
-// ─── Eye icon ────────────────────────────────────────────────────────────────
-function EyeIcon({ open }: { open: boolean }) {
-    return open ? (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />
-        </svg>
-    ) : (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" />
-        </svg>
-    );
-}
-
-// ─── Password strength indicator ─────────────────────────────────────────────
-function PasswordStrength({ password }: { password: string }) {
-    const t = useTranslations("register.strength");
-    if (!password) return null;
-    const checks = [
-        password.length >= 8,
-        /[A-Z]/.test(password),
-        /[0-9]/.test(password),
-        /[^A-Za-z0-9]/.test(password),
-    ];
-    const score = checks.filter(Boolean).length;
-    const labels = [t("weak"), t("fair"), t("good"), t("strong")];
-    const colors = ["bg-red-400", "bg-amber-400", "bg-emerald-400", "bg-emerald-600"];
-    return (
-        <div className="mt-3 space-y-2">
-            <div className="flex gap-1.5 px-0.5">
-                {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < score ? colors[score - 1] : "bg-slate-100"}`} />
-                ))}
-            </div>
-            <p className={`text-[10px] font-bold uppercase tracking-wider ml-1 ${score === 1 ? "text-red-500" : score === 2 ? "text-amber-500" : "text-emerald-500"}`}>
-                {labels[score - 1] ?? ""}
-            </p>
-        </div>
-    );
-}
+import {
+    User, Mail, Calendar, ArrowRight, ArrowLeft,
+    Droplet, Activity, Scaling, MapPin, Navigation,
+    Building, CheckCircle2
+} from "lucide-react";
 
 export default function RegisterPage() {
     const t = useTranslations("register");
@@ -62,217 +25,419 @@ export default function RegisterPage() {
     const router = useRouter();
     const { login } = useAuth();
 
+    const [step, setStep] = useState(1);
     const [serverError, setServerError] = useState<string | null>(null);
-    const [toast, setToast] = useState<string | null>(null);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
 
-    // Dynamic Zod Schema for i18n
-    const registerSchema = useMemo(() => z
-        .object({
-            name: z.string().min(2, te("nameMin")),
-            email: z.string().email(te("invalidEmail")),
-            role: z.enum(["donor", "patient"] as [UserRole, UserRole], {
-                message: te("selectRole"),
-            }),
-            password: z
-                .string()
-                .min(8, te("passwordMin"))
-                .regex(/[A-Z]/, te("passwordUppercase"))
-                .regex(/[0-9]/, te("passwordNumber")),
-            confirmPassword: z.string(),
-        })
-        .refine((d) => d.password === d.confirmPassword, {
-            message: te("passwordsMismatch"),
-            path: ["confirmPassword"],
-        }), [te]);
+    // ─── Validation Schemas ───────────────────────────────────────────────────
+
+    // Combined schema for all steps
+    const registerSchema = useMemo(() => z.object({
+        // Step 1: Personal
+        name: z.string().min(3, "Full Name must be at least 3 characters"),
+        email: z.string().email("Invalid email address"),
+        phone: z.string().regex(/^3\d{2}\s?\d{7}$/, "Must be a valid Pakistani mobile number (e.g. 300 1234567)"),
+        password: z.string().min(8, "Password must be at least 8 characters strong"),
+        dob: z.string().min(4, "Date of birth is required"),
+
+        // Step 2: Blood & Health
+        bloodGroup: z.string().min(1, "Blood group is required"),
+        lastDonationDate: z.string().min(1, "Required (Select 'Never' if first time)"),
+        weight: z.string().optional(),
+        healthConditions: z.string().optional(),
+
+        // Step 3: Location
+        province: z.string().min(1, "Province is required"),
+        city: z.string().min(1, "City is required"),
+        area: z.string().min(1, "Area is required"),
+        address: z.string().min(5, "Full address is required for emergencies"),
+    }), [te]);
 
     type RegisterFormData = z.infer<typeof registerSchema>;
 
-    const { register, handleSubmit, watch, trigger, formState: { errors, isSubmitting } } =
-        useForm<RegisterFormData>({
-            resolver: zodResolver(registerSchema),
-            mode: "onBlur",
-            defaultValues: { role: "donor" },
-        });
+    const {
+        register,
+        handleSubmit,
+        trigger,
+        getValues,
+        formState: { errors, isSubmitting }
+    } = useForm<RegisterFormData>({
+        resolver: zodResolver(registerSchema),
+        mode: "onBlur",
+    });
 
-    const selectedRole = watch("role");
-    const passwordVal = watch("password") ?? "";
-    const confirmPasswordVal = watch("confirmPassword") ?? "";
-    const dismissToast = useCallback(() => setToast(null), []);
 
-    // Reactive validation for password mismatch
-    useEffect(() => {
-        if (errors.confirmPassword) {
-            trigger("confirmPassword");
-        }
-    }, [passwordVal, confirmPasswordVal, trigger, errors.confirmPassword]);
+    // ─── Navigation Logic ──────────────────────────────────────────────────────
+
+    const nextStep = async () => {
+        let fieldsToValidate: (keyof RegisterFormData)[] = [];
+        if (step === 1) fieldsToValidate = ["name", "email", "phone", "password", "dob"];
+        if (step === 2) fieldsToValidate = ["bloodGroup", "lastDonationDate"];
+
+        const isValid = await trigger(fieldsToValidate);
+        if (isValid) setStep(s => s + 1);
+    };
+
+    const prevStep = () => setStep(s => s - 1);
 
     async function onSubmit(data: RegisterFormData) {
         setServerError(null);
         try {
-            const response = await authService.register(data);
-            login(response.user, response.accessToken);
-            setToast(t("creatingAccount"));
-            setTimeout(() => router.push(ROUTES.DASHBOARD), 1200);
+            // Mock server response
+            const response = await authService.register({
+                ...data,
+                role: "donor",
+                password: data.password,
+                confirmPassword: data.password
+            });
+
+            // Log in the user but with isVerified: false
+            login({ ...response.user, isVerified: false }, response.accessToken);
+
+            toast.success("Profile created! Redirecting to verification...");
+            setTimeout(() => router.push("/verify"), 1500);
         } catch (err: unknown) {
             const msg = (err as { message?: string })?.message ?? te("registrationFailed");
             setServerError(msg);
+            toast.error(msg);
         }
     }
 
-    const inputClass = (hasError: boolean) =>
-        `input-premium ${hasError ? "!border-red-400 !bg-red-50 focus:!ring-4 focus:!ring-red-100" : ""}`;
-
     return (
-        <div className="flex flex-col min-h-screen bg-white">
-            <Navbar />
+        <div className="flex flex-col min-h-screen bg-[#FAFAFA] font-sans text-slate-900 selection:bg-red-100 selection:text-red-900">
 
-            {toast && <Toast type="success" message={toast} onClose={dismissToast} />}
 
-            <main className="flex-grow flex items-center justify-center bg-gray-50/50 px-4 py-20 sm:px-6">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="w-full max-w-md"
-                >
-                    <div className="mb-10 text-center">
-                        <h1 className="text-3xl font-black tracking-tight text-slate-900">{t("title")}</h1>
-                        <p className="mt-2 text-slate-500 font-medium">{t("subtitle")}</p>
+            <main className="flex-1 flex flex-col items-center py-12 px-4 sm:px-6 w-full">
+
+                {/* Progress Stepper */}
+                <div className="w-full max-w-2xl mb-12 flex items-center justify-center">
+                    <div className="flex items-center w-full max-w-md relative">
+                        {/* Step 1 */}
+                        <div className="flex flex-col items-center relative z-10">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step >= 1 ? "bg-[#C41C1C] text-white shadow-md shadow-red-200" : "bg-slate-100 text-slate-400"}`}>
+                                {step > 1 ? <CheckCircle2 size={20} /> : "1"}
+                            </div>
+                            <span className={`text-xs font-bold mt-2 absolute -bottom-6 whitespace-nowrap ${step >= 1 ? "text-[#C41C1C]" : "text-slate-400"}`}>Personal Info</span>
+                        </div>
+
+                        <div className={`flex-1 h-0.5 mx-2 transition-colors duration-500 ${step > 1 ? "bg-[#C41C1C]" : "bg-slate-200"}`}></div>
+
+                        {/* Step 2 */}
+                        <div className="flex flex-col items-center relative z-10">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step >= 2 ? "bg-[#C41C1C] text-white shadow-md shadow-red-200" : "bg-slate-100 text-slate-400"}`}>
+                                {step > 2 ? <CheckCircle2 size={20} /> : "2"}
+                            </div>
+                            <span className={`text-xs font-bold mt-2 absolute -bottom-6 whitespace-nowrap ${step >= 2 ? "text-[#C41C1C]" : "text-slate-400"}`}>Blood & Health</span>
+                        </div>
+
+                        <div className={`flex-1 h-0.5 mx-2 transition-colors duration-500 ${step > 2 ? "bg-[#C41C1C]" : "bg-slate-200"}`}></div>
+
+                        {/* Step 3 */}
+                        <div className="flex flex-col items-center relative z-10">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${step >= 3 ? "bg-[#C41C1C] text-white shadow-md shadow-red-200" : "bg-slate-100 text-slate-400"}`}>
+                                3
+                            </div>
+                            <span className={`text-xs font-bold mt-2 absolute -bottom-6 whitespace-nowrap ${step >= 3 ? "text-[#C41C1C]" : "text-slate-400"}`}>Location</span>
+                        </div>
                     </div>
+                </div>
 
-                    <div className="rounded-3xl border border-slate-200 bg-white p-10 shadow-xl shadow-slate-200/50">
-
-                        {serverError && (
+                {/* Form Card */}
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="bg-white w-full max-w-2xl rounded-3xl p-8 md:p-12 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden"
+                >
+                    <AnimatePresence mode="wait">
+                        {step === 1 && (
                             <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                role="alert"
-                                className="mb-6 flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-700"
+                                key="step1"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6"
                             >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="mt-0.5 shrink-0" aria-hidden="true">
-                                    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-                                </svg>
-                                <span className="font-medium">{serverError}</span>
+                                <div className="mb-8">
+                                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Personal Information</h1>
+                                    <p className="text-slate-500 font-medium mt-1 text-sm italic">Let&apos;s start with your basic contact details.</p>
+                                </div>
+
+                                {serverError && (
+                                    <div className="mb-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-700 font-medium">
+                                        {serverError}
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
+                                    <div className="relative flex items-center">
+                                        <User size={18} className="absolute left-4 text-slate-400" />
+                                        <input
+                                            type="text"
+                                            placeholder="John Doe"
+                                            {...register("name")}
+                                            className={`w-full bg-slate-50 border ${errors.name ? '!border-red-400 !bg-red-50 focus:!ring-red-100' : 'border-slate-200'} rounded-xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium`}
+                                        />
+                                    </div>
+                                    {errors.name && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.name.message}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
+                                    <div className="relative flex items-center">
+                                        <Mail size={18} className="absolute left-4 text-slate-400" />
+                                        <input
+                                            type="email"
+                                            placeholder="john@example.com"
+                                            {...register("email")}
+                                            className={`w-full bg-slate-50 border ${errors.email ? '!border-red-400 !bg-red-50 focus:!ring-red-100' : 'border-slate-200'} rounded-xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium`}
+                                        />
+                                    </div>
+                                    {errors.email && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.email.message}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">Account Password</label>
+                                    <div className="relative flex items-center">
+                                        <div className="absolute left-4 text-slate-400 font-bold tracking-widest leading-none" style={{ marginTop: "-6px" }}>***</div>
+                                        <input
+                                            type="password"
+                                            placeholder="Min. 8 characters"
+                                            {...register("password")}
+                                            className={`w-full bg-slate-50 border ${errors.password ? '!border-red-400 !bg-red-50 focus:!ring-red-100' : 'border-slate-200'} rounded-xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium`}
+                                        />
+                                    </div>
+                                    {errors.password && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.password.message}</p>}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Phone Number</label>
+                                        <div className="flex">
+                                            <span className="inline-flex items-center px-4 bg-slate-100 border border-r-0 border-slate-200 text-slate-500 rounded-l-xl font-bold text-sm">+92</span>
+                                            <input
+                                                type="tel"
+                                                placeholder="300 1234567"
+                                                {...register("phone")}
+                                                className={`w-full bg-slate-50 border ${errors.phone ? '!border-red-400 !bg-red-50 focus:!ring-red-100' : 'border-slate-200'} rounded-r-xl py-3.5 px-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium`}
+                                            />
+                                        </div>
+                                        {errors.phone && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.phone.message}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Date of Birth</label>
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="text"
+                                                placeholder="MM/DD/YYYY"
+                                                {...register("dob")}
+                                                className={`w-full bg-slate-50 border ${errors.dob ? '!border-red-400 !bg-red-50 focus:!ring-red-100' : 'border-slate-200'} rounded-xl py-3.5 px-10 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium`}
+                                            />
+                                            <Calendar size={18} className="absolute left-4 text-slate-400 pointer-events-none" />
+                                        </div>
+                                        {errors.dob && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.dob.message}</p>}
+                                    </div>
+                                </div>
+
+                                <div className="pt-6 flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={nextStep}
+                                        className="rounded-full bg-[#C41C1C] px-10 py-4 text-sm font-bold text-white shadow-xl shadow-red-200 transition-all hover:bg-[#A01717] hover:scale-[1.02] flex items-center gap-2"
+                                    >
+                                        Continue <ArrowRight size={18} />
+                                    </button>
+                                </div>
                             </motion.div>
                         )}
 
-                        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
+                        {step === 2 && (
+                            <motion.div
+                                key="step2"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="mb-8">
+                                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Blood & Health</h1>
+                                    <p className="text-slate-500 font-medium mt-1 text-sm italic">Tell us about your blood group and eligibility.</p>
+                                </div>
 
-                            {/* Role selector */}
-                            <div className="space-y-3">
-                                <p className="text-sm font-bold text-slate-700 ml-1">{t("iAmA")}</p>
-                                <div className="grid grid-cols-2 gap-3" role="group" aria-label="Select your role">
-                                    {(["donor", "patient"] as UserRole[]).map((role) => (
-                                        <label
-                                            key={role}
-                                            className={`flex cursor-pointer items-center justify-center rounded-2xl border-2 px-4 py-3.5 text-sm font-bold transition-all duration-200 ${selectedRole === role ? "border-[#C41C1C] bg-red-50 text-[#C41C1C]" : "border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200"}`}
-                                        >
-                                            <input type="radio" value={role} {...register("role")} className="sr-only" />
-                                            {t(role)}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map(group => (
+                                        <label key={group} className="relative cursor-pointer group">
+                                            <input
+                                                type="radio"
+                                                value={group}
+                                                {...register("bloodGroup")}
+                                                className="peer sr-only"
+                                            />
+                                            <div className="h-14 flex items-center justify-center rounded-xl border-2 border-slate-100 bg-slate-50 text-slate-600 font-bold text-lg peer-checked:border-[#C41C1C] peer-checked:bg-red-50 peer-checked:text-[#C41C1C] transition-all group-hover:border-red-200 group-hover:bg-red-50/30">
+                                                {group}
+                                            </div>
                                         </label>
                                     ))}
                                 </div>
-                                {errors.role && <p className="mt-2 text-xs font-semibold text-red-600 ml-1" role="alert">{errors.role.message}</p>}
-                            </div>
+                                {errors.bloodGroup && <p className="text-xs font-semibold text-red-600 ml-1">{errors.bloodGroup.message}</p>}
 
-                            {/* Full name */}
-                            <div className="space-y-2">
-                                <label htmlFor="name" className="block text-sm font-bold text-slate-700 ml-1">{t("fullName")}</label>
-                                <input
-                                    id="name" type="text" autoComplete="name" placeholder={t("namePlaceholder")}
-                                    {...register("name")}
-                                    aria-invalid={!!errors.name}
-                                    className={inputClass(!!errors.name)}
-                                />
-                                {errors.name && <p className="mt-2 text-xs font-semibold text-red-600 ml-1" role="alert">{errors.name.message}</p>}
-                            </div>
-
-                            {/* Email */}
-                            <div className="space-y-2">
-                                <label htmlFor="email" className="block text-sm font-bold text-slate-700 ml-1">{t("email")}</label>
-                                <input
-                                    id="email" type="email" autoComplete="email" placeholder={t("emailPlaceholder")}
-                                    {...register("email")}
-                                    aria-invalid={!!errors.email}
-                                    className={inputClass(!!errors.email)}
-                                />
-                                {errors.email && <p className="mt-2 text-xs font-semibold text-red-600 ml-1" role="alert">{errors.email.message}</p>}
-                            </div>
-
-                            {/* Password + strength meter */}
-                            <div className="space-y-2">
-                                <label htmlFor="password" className="block text-sm font-bold text-slate-700 ml-1">{t("password")}</label>
-                                <div className="relative">
-                                    <input
-                                        id="password"
-                                        type={showPassword ? "text" : "password"}
-                                        autoComplete="new-password"
-                                        placeholder={t("passwordPlaceholder")}
-                                        {...register("password")}
-                                        aria-invalid={!!errors.password}
-                                        className={inputClass(!!errors.password) + " pr-12"}
-                                    />
-                                    <button type="button" onClick={() => setShowPassword((p) => !p)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none">
-                                        <EyeIcon open={showPassword} />
-                                    </button>
-                                </div>
-                                <PasswordStrength password={passwordVal} />
-                                {errors.password && <p className="mt-2 text-xs font-semibold text-red-600 ml-1" role="alert">{errors.password.message}</p>}
-                            </div>
-
-                            {/* Confirm password */}
-                            <div className="space-y-2">
-                                <label htmlFor="confirmPassword" className="block text-sm font-bold text-slate-700 ml-1">{t("confirmPassword")}</label>
-                                <div className="relative">
-                                    <input
-                                        id="confirmPassword"
-                                        type={showConfirm ? "text" : "password"}
-                                        autoComplete="new-password"
-                                        placeholder={t("confirmPlaceholder")}
-                                        {...register("confirmPassword")}
-                                        aria-invalid={!!errors.confirmPassword}
-                                        className={inputClass(!!errors.confirmPassword) + " pr-12"}
-                                    />
-                                    <button type="button" onClick={() => setShowConfirm((p) => !p)} aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none">
-                                        <EyeIcon open={showConfirm} />
-                                    </button>
-                                </div>
-                                {errors.confirmPassword && <p className="mt-2 text-xs font-semibold text-red-600 ml-1" role="alert">{errors.confirmPassword.message}</p>}
-                            </div>
-
-                            {/* Submit */}
-                            <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="rounded-full bg-[#C41C1C] px-10 py-4 text-sm font-bold text-white shadow-xl shadow-red-200 transition-all hover:bg-[#A01717] hover:-translate-y-1 w-full group"
-                            >
-                                <span className={`${isSubmitting ? "opacity-0" : "opacity-100"}`}>
-                                    {t("createAccount")}
-                                </span>
-                                {isSubmitting && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <svg className="h-5 w-5 animate-spin text-white" viewBox="0 0 24 24" fill="none">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                                        </svg>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Last Donation Date</label>
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="text"
+                                                placeholder="MM/DD/YYYY or 'Never'"
+                                                {...register("lastDonationDate")}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium"
+                                            />
+                                            <Droplet size={18} className="absolute left-4 text-slate-400" />
+                                        </div>
+                                        {errors.lastDonationDate && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.lastDonationDate.message}</p>}
                                     </div>
-                                )}
-                            </button>
-                        </form>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Body Weight (kg)</label>
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="number"
+                                                placeholder="e.g. 70"
+                                                {...register("weight")}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium"
+                                            />
+                                            <Scaling size={18} className="absolute left-4 text-slate-400" />
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <div className="mt-8 text-center text-sm font-medium text-slate-500">
-                            {t("alreadyHaveAccount")}{" "}
-                            <Link href={ROUTES.LOGIN} className="font-bold text-[#C41C1C] hover:text-[#A01717] hover:underline transition-colors decoration-2 underline-offset-4">
-                                {t("signIn")}
-                            </Link>
-                        </div>
-                    </div>
-                </motion.div>
+                                <div>
+                                    <label className="block text-sm font-bold text-slate-700 mb-2">Health Conditions (Optional)</label>
+                                    <div className="relative flex items-start">
+                                        <textarea
+                                            placeholder="Any existing conditions, medications, or allergies..."
+                                            {...register("healthConditions")}
+                                            rows={3}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium resize-none"
+                                        />
+                                        <Activity size={18} className="absolute left-4 top-4 text-slate-400" />
+                                    </div>
+                                </div>
+
+                                <div className="pt-6 flex justify-between">
+                                    <button
+                                        type="button"
+                                        onClick={prevStep}
+                                        className="flex items-center gap-2 text-slate-500 font-bold hover:text-slate-800 transition-colors"
+                                    >
+                                        <ArrowLeft size={18} /> Back
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={nextStep}
+                                        className="rounded-full bg-[#C41C1C] px-10 py-4 text-sm font-bold text-white shadow-xl shadow-red-200 transition-all hover:bg-[#A01717] hover:scale-[1.02] flex items-center gap-2"
+                                    >
+                                        Continue <ArrowRight size={18} />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {step === 3 && (
+                            <motion.div
+                                key="step3"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="space-y-6"
+                            >
+                                <div className="mb-8">
+                                    <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Current Location</h1>
+                                    <p className="text-slate-500 font-medium mt-1 text-sm italic">Where should we look for recipients nearby?</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Province/State</label>
+                                        <select
+                                            {...register("province")}
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 px-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-bold text-slate-700"
+                                        >
+                                            <option value="">Select Province</option>
+                                            <option value="Sindh">Sindh</option>
+                                            <option value="Punjab">Punjab</option>
+                                            <option value="KPK">KPK</option>
+                                            <option value="Balochistan">Balochistan</option>
+                                            <option value="Gilgit">Gilgit Baltistan</option>
+                                        </select>
+                                        {errors.province && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.province.message}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">City</label>
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="text"
+                                                placeholder="Karachi, Lahore, etc."
+                                                {...register("city")}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium"
+                                            />
+                                            <Building size={18} className="absolute left-4 text-slate-400" />
+                                        </div>
+                                        {errors.city && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.city.message}</p>}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Area / Sector</label>
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="text"
+                                                placeholder="Gulshan-e-Iqbal"
+                                                {...register("area")}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium"
+                                            />
+                                            <Navigation size={18} className="absolute left-4 text-slate-400" />
+                                        </div>
+                                        {errors.area && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.area.message}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold text-slate-700 mb-2">Full Address</label>
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="text"
+                                                placeholder="Street 12, Block C..."
+                                                {...register("address")}
+                                                className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 focus:ring-2 focus:ring-red-100 focus:border-red-400 outline-none transition-all font-medium"
+                                            />
+                                            <MapPin size={18} className="absolute left-4 text-slate-400" />
+                                        </div>
+                                        {errors.address && <p className="mt-2 text-xs font-semibold text-red-600 ml-1">{errors.address.message}</p>}
+                                    </div>
+                                </div>
+
+                                <div className="pt-6 flex justify-between">
+                                    <button
+                                        type="button"
+                                        onClick={prevStep}
+                                        className="flex items-center gap-2 text-slate-500 font-bold hover:text-slate-800 transition-colors"
+                                    >
+                                        <ArrowLeft size={18} /> Back
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="rounded-full bg-[#C41C1C] px-12 py-4 text-sm font-bold text-white shadow-xl shadow-red-200 transition-all hover:bg-[#A01717] hover:scale-[1.02] flex items-center gap-2 disabled:bg-slate-300 disabled:shadow-none"
+                                    >
+                                        {isSubmitting ? "Creating Account..." : "Complete Profile"}
+                                        <ArrowRight size={18} />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </form>
+
+                <div className="mt-8 text-slate-500 text-sm font-medium">
+                    Already have an account? <Link href={ROUTES.LOGIN} className="text-[#C41C1C] font-black hover:underline decoration-2 underline-offset-4">Sign In</Link>
+                </div>
             </main>
-
-            <Footer />
         </div>
     );
 }

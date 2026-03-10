@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
+import { Link } from "@/i18n/navigation";
 import { ROUTES } from "@/constants/routes";
 
 export const metadata: Metadata = {
@@ -23,9 +21,8 @@ const BANKS = [
 export default function BloodBanksPage() {
     return (
         <>
-            <Navbar />
             <main className="min-h-screen bg-[#f8f6f6]">
-                <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-5xl px-4 py-20 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="mb-10 text-center">
                         <p className="text-sm font-semibold uppercase tracking-widest text-[#C41C1C]">Directory</p>
@@ -78,7 +75,6 @@ export default function BloodBanksPage() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </>
     );
 }

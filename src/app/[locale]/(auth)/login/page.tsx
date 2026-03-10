@@ -4,14 +4,13 @@ import { useState, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import Navbar from "@/shared/components/Navbar";
-import Footer from "@/shared/components/Footer";
 import Logo from "@/shared/components/Logo";
-import Toast from "@/shared/components/ui/Toast";
+import { toast } from "sonner";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/hooks/useAuth";
 import authService from "@/services/auth.service";
@@ -37,7 +36,6 @@ export default function LoginPage() {
     const { login } = useAuth();
 
     const [serverError, setServerError] = useState<string | null>(null);
-    const [toast, setToast] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
 
     // Dynamic Zod Schema for i18n
@@ -51,29 +49,25 @@ export default function LoginPage() {
     const { register, handleSubmit, formState: { errors, isSubmitting } } =
         useForm<LoginFormData>({ resolver: zodResolver(loginSchema), mode: "onBlur" });
 
-    const dismissToast = useCallback(() => setToast(null), []);
-
     async function onSubmit(data: LoginFormData) {
         setServerError(null);
         try {
             const response = await authService.login(data);
             login(response.user, response.accessToken);
-            setToast(t("signingIn"));
+            toast.success(t("signingIn"));
             const redirect = searchParams.get("redirect") ?? ROUTES.DASHBOARD;
             setTimeout(() => router.push(redirect), 1000);
         } catch (err: unknown) {
             const msg = (err as { message?: string })?.message ?? te("loginFailed");
             setServerError(msg);
+            toast.error(msg);
         }
     }
 
     return (
         <div className="flex flex-col min-h-screen bg-white">
-            <Navbar />
 
-            {toast && <Toast type="success" message={toast} onClose={dismissToast} />}
-
-            <main className="flex-grow flex items-center justify-center bg-gray-50/50 px-4 py-20 sm:px-6">
+            <main className="flex-1 flex flex-col items-center justify-center bg-gray-50/50 py-12 px-4 sm:px-6 min-h-[calc(100vh-80px)] w-full">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -190,8 +184,6 @@ export default function LoginPage() {
                     </div>
                 </motion.div>
             </main>
-
-            <Footer />
         </div>
     );
 }

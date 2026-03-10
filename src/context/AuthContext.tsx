@@ -42,9 +42,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const res = await authService.refreshToken().catch(() => ({ accessToken: null }));
                 if (res?.accessToken) {
                     useAuthStore.setState({ token: res.accessToken, isAuthenticated: true });
+                } else {
+                    // Sync: if mock refresh token fails, ensure cookie is cleared so we don't get stuck in redirect loop
+                    document.cookie = `sehatid_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
                 }
             } catch {
-                // No valid session — user stays logged out. This is expected.
+                // No valid session — user stays logged out. Ensure cookie is cleared.
+                document.cookie = `sehatid_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
             }
         }
 

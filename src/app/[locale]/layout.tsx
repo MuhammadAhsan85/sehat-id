@@ -83,6 +83,10 @@ const jsonLd = {
   },
 };
 
+import { Toaster } from "sonner";
+import Navbar from "@/shared/components/Navbar";
+import Footer from "@/shared/components/Footer";
+
 export default async function RootLayout({
   children,
   params,
@@ -103,10 +107,29 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.variable} ${inter.className} antialiased`} suppressHydrationWarning>
+      <body className={`${inter.variable} ${inter.className} antialiased flex flex-col min-h-screen bg-[#FAFAFA]`} suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
-            {children}
+            <Navbar />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+            <Toaster
+              position="top-right"
+              expand={false}
+              richColors
+              closeButton
+              toastOptions={{
+                style: {
+                  borderRadius: '1.25rem',
+                  padding: '1rem',
+                  border: '1px solid #f1f5f9',
+                  boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                },
+                className: "font-sans font-medium",
+              }}
+            />
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

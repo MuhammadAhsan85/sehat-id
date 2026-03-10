@@ -1,15 +1,18 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from "@/i18n/navigation";
 import { Clock, MapPin, Building2, ChevronDown, Search, CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { ROUTES } from "@/constants/routes";
 import { useDonorSearch } from "@/hooks/useDonorSearch";
 import type { BloodGroup, Donor } from "@/types/donor";
+import { ConfirmationModal } from "./ConfirmationModal";
+import { DonorCard } from "./DonorCard";
 
 export function DonorSearch() {
-    const { filters, results, total, isLoading, updateFilter, refetch } = useDonorSearch();
+    const { filters, results, total, isLoading, updateFilter, refetch, resetFilters } = useDonorSearch();
+    const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
 
     return (
         <div className="min-h-screen bg-[#FDFDFD] font-sans text-gray-900 selection:bg-red-100 selection:text-red-900 pt-10 pb-20">
@@ -34,15 +37,21 @@ export function DonorSearch() {
                     <div>
                         <h3 className="text-lg font-bold text-gray-900 mb-4">Filters</h3>
                         <div className="space-y-2">
-                            <button className="w-full flex items-center gap-3 bg-red-50 text-[#C52B2A] px-4 py-3 rounded-xl font-medium transition-transform hover:scale-[1.02] shadow-sm">
+                            <button
+                                onClick={() => updateFilter("availableOnly", !filters.availableOnly)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all hover:scale-[1.02] shadow-sm ${filters.availableOnly ? "bg-red-50 text-[#C52B2A] border border-red-100" : "bg-white text-gray-600 border border-gray-100 hover:border-gray-200"}`}
+                            >
                                 <Clock size={18} />
                                 <span>Available Now</span>
                             </button>
-                            <button className="w-full flex items-center gap-3 text-gray-600 px-4 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200">
+                            <button
+                                onClick={() => updateFilter("distance", 50)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all hover:scale-[1.02] shadow-sm ${filters.distance ? "bg-red-50 text-[#C52B2A] border border-red-100" : "bg-white text-gray-600 border border-gray-100 hover:border-gray-200"}`}
+                            >
                                 <MapPin size={18} />
                                 <span>Distance Radius</span>
                             </button>
-                            <button className="w-full flex items-center gap-3 text-gray-600 px-4 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200">
+                            <button className="w-full flex items-center gap-3 bg-white text-gray-600 px-4 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors border border-gray-100 hover:border-gray-200">
                                 <Building2 size={18} />
                                 <span>Hospital Proximity</span>
                             </button>
@@ -68,6 +77,13 @@ export function DonorSearch() {
                                 <span className="text-gray-600 group-hover:text-gray-900 transition-colors text-sm font-medium">Previous Donors</span>
                             </label>
                         </div>
+
+                        <button
+                            onClick={resetFilters}
+                            className="mt-8 text-xs font-bold text-[#C52B2A] hover:underline"
+                        >
+                            Reset All Filters
+                        </button>
                     </div>
                 </aside>
 
@@ -121,16 +137,31 @@ export function DonorSearch() {
                         </div>
 
                         <div className="w-full md:w-auto flex bg-gray-50 rounded-full p-1 border border-gray-200">
-                            <button className="flex-1 px-6 py-2 rounded-full text-sm font-bold bg-white shadow-sm text-gray-900">Normal</button>
-                            <button className="flex-1 px-6 py-2 rounded-full text-sm font-bold text-[#C52B2A] hover:bg-red-50 transition-colors">Urgent</button>
+                            <button
+                                onClick={() => updateFilter("isUrgent", false)}
+                                className={`flex-1 px-6 py-2 rounded-full text-sm font-bold transition-all ${!filters.isUrgent ? "bg-white shadow-sm text-gray-900" : "text-gray-400 hover:text-gray-600"}`}
+                            >
+                                Normal
+                            </button>
+                            <button
+                                onClick={() => updateFilter("isUrgent", true)}
+                                className={`flex-1 px-6 py-2 rounded-full text-sm font-bold transition-all ${filters.isUrgent ? "bg-white shadow-sm text-[#C52B2A]" : "text-gray-400 hover:text-red-400"}`}
+                            >
+                                Urgent
+                            </button>
                         </div>
 
                         <button
                             onClick={refetch}
-                            className="rounded-full bg-[#C41C1C] px-10 py-4 text-sm font-bold text-white shadow-xl shadow-red-200 transition-all hover:bg-[#A01717] hover:-translate-y-1 w-full md:w-auto flex items-center justify-center gap-2"
+                            disabled={isLoading}
+                            className="rounded-full bg-[#C41C1C] px-10 py-4 text-sm font-bold text-white shadow-xl shadow-red-200 transition-all hover:bg-[#A01717] hover:-translate-y-1 w-full md:w-auto flex items-center justify-center gap-2 disabled:opacity-70 disabled:translate-y-0"
                         >
-                            <Search size={18} />
-                            <span>Search</span>
+                            {isLoading ? (
+                                <Loader2 size={18} className="animate-spin" />
+                            ) : (
+                                <Search size={18} />
+                            )}
+                            <span>{isLoading ? 'Searching...' : 'Search'}</span>
                         </button>
                     </div>
 
@@ -160,7 +191,7 @@ export function DonorSearch() {
                             <h3 className="text-xl font-bold text-gray-900 mb-2">No donors found</h3>
                             <p className="text-gray-500 max-w-sm mb-6">We couldn't find any donors matching your current search criteria. Try adjusting your filters.</p>
                             <button
-                                onClick={() => updateFilter("bloodGroup", "")}
+                                onClick={resetFilters}
                                 className="bg-red-50 text-[#C52B2A] px-6 py-2 rounded-lg font-bold hover:bg-red-100 transition-colors"
                             >
                                 Clear Filters
@@ -170,54 +201,11 @@ export function DonorSearch() {
                         // Donor Cards Grid
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                             {results.map((donor, idx) => (
-                                <div
+                                <DonorCard
                                     key={donor.id}
-                                    className="bg-white rounded-2xl p-6 border border-gray-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(197,43,42,0.12)] hover:-translate-y-1 transition-all duration-300 animate-fade-up group"
-                                    style={{ animationDelay: `${300 + (Math.min(idx, 10) * 100)}ms` }}
-                                >
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div className="flex items-center space-x-4">
-                                            <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-red-200 transition-colors relative">
-                                                <Image
-                                                    src={`https://api.dicebear.com/7.x/initials/svg?seed=${donor.name}&backgroundColor=f3f4f6`}
-                                                    alt={donor.name}
-                                                    fill
-                                                    className="object-cover"
-                                                    unoptimized
-                                                />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold text-gray-900 flex items-center">
-                                                    {donor.name}
-                                                    {donor.isVerified && <CheckCircle2 size={18} className="text-green-500 ml-1.5" fill="currentColor" stroke="white" strokeWidth={1} />}
-                                                </h3>
-                                                <p className="text-sm text-gray-500 flex items-center mt-0.5 font-medium">
-                                                    <MapPin size={14} className="mr-1" /> {donor.city}, {donor.province}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="bg-red-50 text-[#C52B2A] font-black text-xl px-4 py-2 rounded-xl group-hover:scale-105 transition-transform">
-                                            {donor.bloodGroup}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex justify-between mb-6 px-2">
-                                        <div>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Last Donated</p>
-                                            <p className="text-sm font-bold text-gray-800">{donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString() : 'Never'}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Donations</p>
-                                            <p className="text-sm font-bold text-gray-800">{donor.donationCount} {donor.donationCount > 0 ? 'Total' : 'First Time'}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex space-x-3">
-                                        <Link href={ROUTES.REGISTER} className="rounded-full bg-[#C41C1C] px-10 py-4 text-sm font-bold text-white shadow-xl shadow-red-200 transition-all hover:bg-[#A01717] hover:-translate-y-1 flex-1 text-center">
-                                            Request Connection
-                                        </Link>
-                                    </div>
-                                </div>
+                                    donor={donor}
+                                    onConnect={(d) => setSelectedDonor(d)}
+                                />
                             ))}
                         </div>
                     )}
@@ -239,7 +227,17 @@ export function DonorSearch() {
 
                 </section>
             </main>
-        </div >
+
+            <ConfirmationModal
+                isOpen={!!selectedDonor}
+                onClose={() => setSelectedDonor(null)}
+                onConfirm={() => {
+                    setSelectedDonor(null);
+                }}
+                donorName={selectedDonor?.name}
+                donorId={selectedDonor?.id}
+            />
+        </div>
     );
 }
 

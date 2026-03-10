@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Logo from "./Logo";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import type { NavLink } from "@/types/navigation";
@@ -55,7 +55,7 @@ export default function Navbar() {
 
     return (
         <header
-            className="fixed top-0 left-0 right-0 z-[100] w-full bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300"
+            className="sticky top-0 left-0 right-0 z-[100] w-full bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300"
             ref={headerRef}
         >
             <nav

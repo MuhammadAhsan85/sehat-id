@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { ROUTES } from "@/constants/routes";
@@ -10,7 +10,7 @@ export default function HeroSection() {
     const t = useTranslations("home");
 
     return (
-        <section className="relative overflow-hidden bg-white pt-20 pb-24 lg:pt-32 lg:pb-36">
+        <section className="relative overflow-hidden bg-white pt-12 pb-24 lg:pt-16 lg:pb-36">
             {/* Background Accents */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden" aria-hidden="true">
                 <motion.div

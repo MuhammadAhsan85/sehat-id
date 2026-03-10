@@ -10,8 +10,18 @@ export interface LoginCredentials {
 export interface RegisterPayload {
     name: string;
     email: string;
-    password: string;
-    confirmPassword: string;
+    phone: string;
+    dob: string;
+    bloodGroup: string;
+    lastDonationDate: string;
+    weight?: string;
+    healthConditions?: string;
+    province: string;
+    city: string;
+    area: string;
+    address: string;
+    password?: string;
+    confirmPassword?: string;
     role: UserRole;
 }
 
